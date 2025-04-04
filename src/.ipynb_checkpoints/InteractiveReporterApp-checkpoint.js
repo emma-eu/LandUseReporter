@@ -83,7 +83,8 @@ export default function InteractiveReporterApp() {
           visibleElements: {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
             selectionTools: { "rectangle-selection": false },
-            undoRedoMenu: false
+            undoRedoMenu: false,
+            settingsMenu: false
           },
           polygonSymbol: {
             type: "simple-fill",
