@@ -52,7 +52,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["attribution"] },
+        ui: { components: ["zoom", "attribution"] },
       });
 
       setView(view);
@@ -69,8 +69,6 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
-        infoDiv.style.position = "absolute";
-        infoDiv.style.zIndex = "999";
         view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
@@ -180,13 +178,13 @@ export default function InteractiveReporterApp() {
 
   function renderPopup(isDrawn = false) {
     return (
-      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1, zIndex: 1300 }} role="presentation">
+      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Feature Feedback</DialogTitle>
         <DialogContent>
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <Box sx={{ zIndex: 1301, position: "relative" }}>
+            <Box sx={{ zIndex: 1400, position: "relative" }}>
               <FormControl fullWidth sx={{ mb: 1 }}>
                 <InputLabel id="center-label">Land Use Classification</InputLabel>
                 <Select
@@ -194,7 +192,11 @@ export default function InteractiveReporterApp() {
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   MenuProps={{
-                    sx: { zIndex: 1400 }
+                    PaperProps: {
+                      sx: {
+                        zIndex: 2001
+                      }
+                    }
                   }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
