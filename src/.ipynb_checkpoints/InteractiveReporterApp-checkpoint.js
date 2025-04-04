@@ -12,12 +12,12 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
-//import FormGroup from "@mui/material/FormGroup";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
+import Zoom from "@arcgis/core/widgets/Zoom";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
@@ -62,6 +62,9 @@ export default function InteractiveReporterApp() {
       view.when(async () => {
         const legend = new Legend({ view });
         if (legendRef.current) legend.container = legendRef.current;
+
+        const zoom = new Zoom({ view });
+        view.ui.add(zoom, "bottom-left");
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
