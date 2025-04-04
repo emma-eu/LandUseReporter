@@ -125,7 +125,7 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer",
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer/0",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
