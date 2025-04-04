@@ -65,13 +65,14 @@ export default function InteractiveReporterApp() {
         view.ui.add(zoom, "bottom-left");
 
         const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
-        infoDiv.style.padding = "6px 12px";
-        infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
-        infoDiv.style.fontSize = "13px";
-        infoDiv.style.borderRadius = "4px";
-        infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-        infoDiv.style.maxWidth = "200px";
+        infoDiv.innerHTML = "<span style='font-size: 16px;'>🛈</span> Use the +/- or two fingers on your trackpad to zoom.<br>Click and drag to pan.";
+        infoDiv.style.padding = "8px 14px";
+        infoDiv.style.background = "rgba(255, 255, 255, 0.95)";
+        infoDiv.style.fontSize = "14px";
+        infoDiv.style.borderRadius = "6px";
+        infoDiv.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+        infoDiv.style.maxWidth = "220px";
+        infoDiv.style.margin = "10px";
         view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
@@ -182,26 +183,31 @@ export default function InteractiveReporterApp() {
 
   function renderPopup(isDrawn = false) {
     return (
-      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1, zIndex: 1300 }} role="presentation">
         <DialogTitle>Feature Feedback</DialogTitle>
         <DialogContent>
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <>
-              <Box sx={{ position: 'relative', zIndex: 2001 }}>
-                <FormControl fullWidth sx={{ mb: 1 }}>
-                  <InputLabel id="center-label">Land Use Classification</InputLabel>
-                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                    <MenuItem value="Industrial District">Industrial District</MenuItem>
-                    <MenuItem value="Employment District">Employment District</MenuItem>
-                    <MenuItem value="Educational Center">Educational Center</MenuItem>
-                    <MenuItem value="Retail">Retail</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+            <FormControl fullWidth sx={{ mb: 1, zIndex: 1301 }}>
+              <InputLabel id="center-label">Land Use Classification</InputLabel>
+              <Select
+                labelId="center-label"
+                value={priorityLevel}
+                onChange={(e) => setPriorityLevel(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: { zIndex: 2001 },
+                  },
+                }}
+              >
+                <MenuItem value="Industrial District">Industrial District</MenuItem>
+                <MenuItem value="Employment District">Employment District</MenuItem>
+                <MenuItem value="Educational Center">Educational Center</MenuItem>
+                <MenuItem value="Retail">Retail</MenuItem>
+              </Select>
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-            </>
+            </FormControl>
           ) : (
             <>
               <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
