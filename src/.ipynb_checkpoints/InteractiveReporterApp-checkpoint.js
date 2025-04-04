@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-// Material UI components for layout and UI
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
@@ -36,6 +35,7 @@ export default function InteractiveReporterApp() {
   const [isCenter, setisCenter] = useState(false);
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
+  const [mapComment, setMapComment] = useState("");
 
   useEffect(() => {
     const loadMap = async () => {
@@ -180,7 +180,7 @@ export default function InteractiveReporterApp() {
             <>
               <Box sx={{ position: 'relative', zIndex: 2001 }}>
                 <FormControl fullWidth sx={{ mb: 1 }}>
-                  <InputLabel id="center-label">Center Classification</InputLabel>
+                  <InputLabel id="center-label">Land Use Classification</InputLabel>
                   <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
                     <MenuItem value="Industrial District">Industrial District</MenuItem>
                     <MenuItem value="Employment District">Employment District</MenuItem>
@@ -195,21 +195,6 @@ export default function InteractiveReporterApp() {
             <>
               <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
               <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
-              <FormGroup>
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
-              </FormGroup>
-              <Box sx={{ position: 'relative', zIndex: 2001 }}>
-                <FormControl fullWidth margin="dense">
-                  <InputLabel id="center-label">Center Classification</InputLabel>
-                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                    <MenuItem value="Industrial District">Industrial District</MenuItem>
-                    <MenuItem value="Employment District">Employment District</MenuItem>
-                    <MenuItem value="Educational Center">Educational Center</MenuItem>
-                    <MenuItem value="Retail">Retail</MenuItem>
-                    <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </>
           )}
@@ -251,13 +236,28 @@ export default function InteractiveReporterApp() {
           </Box>
 
           <Card sx={{ my: 2, mb: 1 }}>
-            <CardContent sx={{ height: 450, display: 'flex' }}>
+            <CardContent sx={{ height: 500, display: 'flex', position: 'relative' }}>
               <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
+              <TextField
+                value={mapComment}
+                onChange={(e) => setMapComment(e.target.value)}
+                placeholder="🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan."
+                variant="outlined"
+                multiline
+                rows={3}
+                sx={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  width: 'calc(80% - 20px)',
+                  backgroundColor: 'white',
+                  zIndex: 10
+                }}
+              />
               <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
             </CardContent>
           </Card>
 
-          {/* POPUP FOR EXISTING FEATURES */}
           <Drawer
             anchor="right"
             open={openExisting}
@@ -268,7 +268,6 @@ export default function InteractiveReporterApp() {
             {renderPopup()}
           </Drawer>
 
-          {/* POPUP FOR USER-DRAWN FEATURES */}
           <Drawer
             anchor="right"
             open={openDrawn}
