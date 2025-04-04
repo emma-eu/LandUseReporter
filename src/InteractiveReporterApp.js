@@ -221,7 +221,6 @@ export default function InteractiveReporterApp() {
               ) : (
                 <>
                   <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of  one of the significant land uses as described below." />
-                  </FormControl>
                 </>
               )}
 
