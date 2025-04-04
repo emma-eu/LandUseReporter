@@ -32,7 +32,6 @@ export default function InteractiveReporterApp() {
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
-  const [isCenter, setisCenter] = useState(false);
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
 
@@ -151,7 +150,7 @@ export default function InteractiveReporterApp() {
         name,
         organization,
         submittedcomment: comment,
-        is_center: isCenter ? 1 : 0,
+        is_center: 0,
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
