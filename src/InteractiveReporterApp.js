@@ -69,6 +69,7 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
+        infoDiv.style.zIndex = "9999";
         view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
@@ -148,7 +149,7 @@ export default function InteractiveReporterApp() {
         organization,
         submittedcomment: comment,
         correct_type: likesProject ? 1 : 0,
-        updated_type: priorityLevel,
+        type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
@@ -184,7 +185,7 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <Box sx={{ zIndex: 1400, position: "relative" }}>
+            <Box sx={{ zIndex: 1500, position: "relative" }}>
               <FormControl fullWidth sx={{ mb: 1 }}>
                 <InputLabel id="center-label">Land Use Classification</InputLabel>
                 <Select
@@ -193,8 +194,8 @@ export default function InteractiveReporterApp() {
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   MenuProps={{
                     PaperProps: {
-                      sx: {
-                        zIndex: 2001
+                      style: {
+                        zIndex: 3000
                       }
                     }
                   }}
