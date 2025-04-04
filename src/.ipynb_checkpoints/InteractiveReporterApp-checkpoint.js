@@ -1,6 +1,5 @@
-// NOTE: This update fixes the Sketch activation logic so the "Add A Feature" button allows users to start drawing a polygon immediately
-
 import { useEffect, useRef, useState } from "react";
+import CssBaseline from "@mui/material/CssBaseline";
 // Material UI components for layout and UI
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -19,7 +18,7 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import Legend from "@arcgis/core/widgets/Legend"; // ArcGIS Legend widget
+import Legend from "@arcgis/core/widgets/Legend";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
@@ -27,7 +26,8 @@ export default function InteractiveReporterApp() {
   const sketchRef = useRef(null);
   const [, setView] = useState(null);
 
-  const [open, setOpen] = useState(false);
+  const [openExisting, setOpenExisting] = useState(false);
+  const [openDrawn, setOpenDrawn] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
   const [name, setName] = useState("");
@@ -47,7 +47,7 @@ export default function InteractiveReporterApp() {
       ]);
 
       const webmap = new WebMap.default({
-        portalItem: { id: "193de866247a4946a17331d2fdefc294" },
+        portalItem: { id: "18f4d3e4ab4045a48c80553a693294bb" },
       });
 
       const view = new MapView.default({
@@ -95,7 +95,7 @@ export default function InteractiveReporterApp() {
           if (event.state === "complete") {
             setDrawnGeometry(event.graphic.geometry);
             setSelectedFeature(null);
-            setOpen(true);
+            setOpenDrawn(true);
           }
         });
 
@@ -105,7 +105,7 @@ export default function InteractiveReporterApp() {
           if (result) {
             setSelectedFeature(result.graphic);
             setDrawnGeometry(null);
-            setOpen(true);
+            setOpenExisting(true);
           }
         });
       });
@@ -126,7 +126,7 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
@@ -159,7 +159,8 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    setOpen(false);
+    setOpenExisting(false);
+    setOpenDrawn(false);
     setName("");
     setComment("");
     setLikesProject(false);
@@ -168,86 +169,117 @@ export default function InteractiveReporterApp() {
     setDrawnGeometry(null);
   };
 
-  return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
-      <Box width="100%" maxWidth="1250px">
-        <Typography variant="h4" gutterBottom>
-          MAG First Draft Centers Map Feedback
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-         Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
-        </Typography>
-
-        <Box display="flex" gap={2} mb={2}>
-          <Button variant="contained" color="primary" onClick={startDrawing}>
-            Add A Feature
-          </Button>
-        </Box>
-
-        <Card sx={{ my: 2, mb: 1 }}>
-          <CardContent sx={{ height: 450, display: 'flex' }}>
-            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
-            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
-          </CardContent>
-        </Card>
-
-        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
-            <DialogTitle>Feature Feedback</DialogTitle>
-            <DialogContent>
-              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
-              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-              {drawnGeometry ? (
-                <>
-                  <FormControl fullWidth sx={{ mb: 1 }}>
-                    <InputLabel id="center-label">Center Classification</InputLabel>
-                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-                </>
-              ) : (
-                <>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
-                  <FormGroup>
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
-                  </FormGroup>
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel id="center-label">Center Classification</InputLabel>
-                    <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-                </>
-              )}
-            </DialogContent>
-            <DialogActions>
-              {drawnGeometry && sketchRef.current && (
-                <Button color="error" onClick={() => {
-                  const layer = sketchRef.current.layer;
-                  layer.removeAll();
-                  setDrawnGeometry(null);
-                  setOpen(false);
-                }}>
-                  Delete Feature
-                </Button>
-              )}
-              <Button onClick={() => setOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
-            </DialogActions>
-          </Box>
-        </Drawer>
+  function renderPopup(isDrawn = false) {
+    return (
+      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+        <DialogTitle>Feature Feedback</DialogTitle>
+        <DialogContent>
+          <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+          <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+          {isDrawn ? (
+            <>
+              <Box sx={{ position: 'relative', zIndex: 2001 }}>
+                <FormControl fullWidth sx={{ mb: 1 }}>
+                  <InputLabel id="center-label">Center Classification</InputLabel>
+                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                    <MenuItem value="Industrial District">Industrial District</MenuItem>
+                    <MenuItem value="Employment District">Employment District</MenuItem>
+                    <MenuItem value="Educational Center">Educational Center</MenuItem>
+                    <MenuItem value="Retail">Retail</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </>
+          ) : (
+            <>
+              <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
+              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
+              <FormGroup>
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>If the center is incorrectly classified, select the correct classification from the options below: </Typography>
+              </FormGroup>
+              <Box sx={{ position: 'relative', zIndex: 2001 }}>
+                <FormControl fullWidth margin="dense">
+                  <InputLabel id="center-label">Center Classification</InputLabel>
+                  <Select labelId="center-label" value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)}>
+                    <MenuItem value="Industrial District">Industrial District</MenuItem>
+                    <MenuItem value="Employment District">Employment District</MenuItem>
+                    <MenuItem value="Educational Center">Educational Center</MenuItem>
+                    <MenuItem value="Retail">Retail</MenuItem>
+                    <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          {drawnGeometry && sketchRef.current && (
+            <Button color="error" onClick={() => {
+              const layer = sketchRef.current.layer;
+              layer.removeAll();
+              setDrawnGeometry(null);
+              setOpenDrawn(false);
+            }}>
+              Delete Feature
+            </Button>
+          )}
+          <Button onClick={() => { isDrawn ? setOpenDrawn(false) : setOpenExisting(false); }}>Cancel</Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+        </DialogActions>
       </Box>
-    </Box>
+    );
+  }
+
+  return (
+    <>
+      <CssBaseline />
+      <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+        <Box width="100%" maxWidth="1250px">
+          <Typography variant="h4" gutterBottom>
+            MAG First Draft Centers Map Feedback
+          </Typography>
+          <Typography variant="h6" gutterBottom>
+            Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
+          </Typography>
+
+          <Box display="flex" gap={2} mb={2}>
+            <Button variant="contained" color="primary" onClick={startDrawing}>
+              Add A Feature
+            </Button>
+          </Box>
+
+          <Card sx={{ my: 2, mb: 1 }}>
+            <CardContent sx={{ height: 450, display: 'flex' }}>
+              <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
+              <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+            </CardContent>
+          </Card>
+
+          {/* POPUP FOR EXISTING FEATURES */}
+          <Drawer
+            anchor="right"
+            open={openExisting}
+            onClose={() => setOpenExisting(false)}
+            ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
+            sx={{ zIndex: 2000 }}
+          >
+            {renderPopup()}
+          </Drawer>
+
+          {/* POPUP FOR USER-DRAWN FEATURES */}
+          <Drawer
+            anchor="right"
+            open={openDrawn}
+            onClose={() => setOpenDrawn(false)}
+            ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
+            sx={{ zIndex: 2000 }}
+          >
+            {renderPopup(true)}
+          </Drawer>
+        </Box>
+      </Box>
+    </>
   );
 }
