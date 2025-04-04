@@ -17,7 +17,6 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
-import Zoom from "@arcgis/core/widgets/Zoom";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
@@ -53,6 +52,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
+        ui: { components: ["zoom", "attribution"] },
       });
 
       setView(view);
@@ -61,21 +61,14 @@ export default function InteractiveReporterApp() {
         const legend = new Legend({ view });
         if (legendRef.current) legend.container = legendRef.current;
 
-        const zoom = new Zoom({ view });
-        view.ui.add(zoom, "top-left");
-
         const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = "<span style='font-size: 16px;'>🛈</span> Use the +/- or two fingers on your trackpad to zoom.<br>Click and drag to pan.";
-        infoDiv.style.padding = "8px 14px";
-        infoDiv.style.background = "rgba(255, 255, 255, 0.95)";
-        infoDiv.style.fontSize = "14px";
-        infoDiv.style.borderRadius = "6px";
-        infoDiv.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
-        infoDiv.style.maxWidth = "220px";
-        infoDiv.style.margin = "10px";
-        infoDiv.style.position = "absolute";
-        infoDiv.style.zIndex = "1000";
-        view.container.appendChild(infoDiv);
+        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
+        infoDiv.style.padding = "6px 12px";
+        infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
+        infoDiv.style.fontSize = "13px";
+        infoDiv.style.borderRadius = "4px";
+        infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+        infoDiv.style.maxWidth = "200px";
         view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
