@@ -52,7 +52,7 @@ export default function InteractiveReporterApp() {
         map: webmap,
         center: [-111.787301, 40.221715],
         zoom: 10.5,
-        ui: { components: ["zoom", "attribution"] },
+        ui: { components: ["attribution"] },
       });
 
       setView(view);
@@ -69,6 +69,8 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
+        infoDiv.style.position = "absolute";
+        infoDiv.style.zIndex = "999";
         view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
@@ -148,7 +150,7 @@ export default function InteractiveReporterApp() {
         organization,
         submittedcomment: comment,
         correct_type: likesProject ? 1 : 0,
-        type: priorityLevel,
+        updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
@@ -184,7 +186,7 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <Box sx={{ zIndex: 2001, position: "relative" }}>
+            <Box sx={{ zIndex: 1301, position: "relative" }}>
               <FormControl fullWidth sx={{ mb: 1 }}>
                 <InputLabel id="center-label">Land Use Classification</InputLabel>
                 <Select
@@ -192,11 +194,7 @@ export default function InteractiveReporterApp() {
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        zIndex: 2002,
-                      },
-                    },
+                    sx: { zIndex: 1400 }
                   }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
