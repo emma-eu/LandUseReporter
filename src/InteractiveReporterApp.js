@@ -147,9 +147,8 @@ export default function InteractiveReporterApp() {
         name,
         organization,
         submittedcomment: comment,
-        //is_center: 0,
         correct_type: likesProject ? 1 : 0,
-        updated_type: priorityLevel,
+        type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
       },
@@ -185,25 +184,29 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <FormControl fullWidth sx={{ mb: 1, zIndex: 2001 }}>
-              <InputLabel id="center-label">Land Use Classification</InputLabel>
-              <Select
-                labelId="center-label"
-                value={priorityLevel}
-                onChange={(e) => setPriorityLevel(e.target.value)}
-                MenuProps={{
-                  PaperProps: {
-                    sx: { zIndex: 2002 },
-                  },
-                }}
-              >
-                <MenuItem value="Industrial District">Industrial District</MenuItem>
-                <MenuItem value="Employment District">Employment District</MenuItem>
-                <MenuItem value="Educational Center">Educational Center</MenuItem>
-                <MenuItem value="Retail">Retail</MenuItem>
-              </Select>
+            <Box sx={{ zIndex: 2001, position: "relative" }}>
+              <FormControl fullWidth sx={{ mb: 1 }}>
+                <InputLabel id="center-label">Land Use Classification</InputLabel>
+                <Select
+                  labelId="center-label"
+                  value={priorityLevel}
+                  onChange={(e) => setPriorityLevel(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        zIndex: 2002,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="Industrial District">Industrial District</MenuItem>
+                  <MenuItem value="Employment District">Employment District</MenuItem>
+                  <MenuItem value="Educational Center">Educational Center</MenuItem>
+                  <MenuItem value="Retail">Retail</MenuItem>
+                </Select>
+              </FormControl>
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-            </FormControl>
+            </Box>
           ) : (
             <>
               <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
