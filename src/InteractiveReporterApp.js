@@ -32,6 +32,7 @@ export default function InteractiveReporterApp() {
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
+  const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
@@ -148,6 +149,7 @@ export default function InteractiveReporterApp() {
         name,
         organization,
         submittedcomment: comment,
+        correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
@@ -170,6 +172,7 @@ export default function InteractiveReporterApp() {
     setOpenDrawn(false);
     setName("");
     setComment("");
+    setLikesProject(false);
     setPriorityLevel("");
     setSelectedFeature(null);
     setDrawnGeometry(null);
@@ -201,7 +204,10 @@ export default function InteractiveReporterApp() {
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </Box>
           ) : (
-            <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            <>
+              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </>
           )}
         </DialogContent>
         <DialogActions>
