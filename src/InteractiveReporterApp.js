@@ -44,7 +44,7 @@ export default function InteractiveReporterApp() {
       ]);
 
       const webmap = new WebMap.default({
-        portalItem: { id: "193de866247a4946a17331d2fdefc294" },
+        portalItem: { id: "18f4d3e4ab4045a48c80553a693294bb" },
       });
 
       const view = new MapView.default({
@@ -125,7 +125,7 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/CenterResponses/FeatureServer/0",
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
@@ -173,7 +173,7 @@ export default function InteractiveReporterApp() {
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
       <Box width="100%" maxWidth="1250px">
         <Typography variant="h4" gutterBottom>
-          MAG First Draft Centers Map Feedback
+          MAG First Draft Significant Land Uses Map Feedback
         </Typography>
         <Typography variant="h6" gutterBottom>
           Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
@@ -202,7 +202,7 @@ export default function InteractiveReporterApp() {
               {isUserCreatedFeature ? (
                 <>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                    Select a classification for this new center:
+                    Select a classification for this new land use area:
                   </Typography>
                   <FormControl fullWidth margin="dense">
                     <InputLabel>Center Classification</InputLabel>
@@ -211,32 +211,16 @@ export default function InteractiveReporterApp() {
                       onChange={(e) => setPriorityLevel(e.target.value)}
                       label="Center Classification"
                     >
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
+                      <MenuItem value="Industrial District">Industrial District</MenuItem>
+                      <MenuItem value="Educational Center">Educational Center</MenuItem>
+                      <MenuItem value="Employment District">Employment District</MenuItem>
+                      <MenuItem value="Retail">Retail</MenuItem>
                     </Select>
                   </FormControl>
                 </>
               ) : (
                 <>
-                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                    If the classification for this center is incorrect in the current map, select the correct classification for this center:
-                  </Typography>
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel>Center Classification</InputLabel>
-                    <Select
-                      value={priorityLevel}
-                      onChange={(e) => setPriorityLevel(e.target.value)}
-                      label="Center Classification"
-                    >
-                      <MenuItem value="Metropolitan">Metropolitan</MenuItem>
-                      <MenuItem value="Urban">Urban</MenuItem>
-                      <MenuItem value="City">City</MenuItem>
-                      <MenuItem value="Neighborhood">Neighborhood</MenuItem>
-                      <MenuItem value="NOT A CENTER">This is not a center</MenuItem>
-                    </Select>
+                  <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of  one of the significant land uses as described below." />
                   </FormControl>
                 </>
               )}
