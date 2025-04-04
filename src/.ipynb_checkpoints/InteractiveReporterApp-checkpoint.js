@@ -196,8 +196,7 @@ export default function InteractiveReporterApp() {
             </>
           ) : (
             <>
-              <FormControlLabel control={<Checkbox checked={isCenter} onChange={(e) => setisCenter(e.target.checked)} />} label="This feature meets the characteristics of a center." />
-              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This center is correctly classified." />
+              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </>
           )}
@@ -226,7 +225,7 @@ export default function InteractiveReporterApp() {
       <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
         <Box width="100%" maxWidth="1250px">
           <Typography variant="h4" gutterBottom>
-            MAG First Draft Centers Map Feedback
+            MAG First Draft Significant Land Uses Map Feedback
           </Typography>
           <Typography variant="h6" gutterBottom>
             Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
