@@ -62,7 +62,7 @@ export default function InteractiveReporterApp() {
         if (legendRef.current) legend.container = legendRef.current;
 
         const zoom = new Zoom({ view });
-        view.ui.add(zoom, "bottom-left");
+        view.ui.add(zoom, "top-left");
 
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "<span style='font-size: 16px;'>🛈</span> Use the +/- or two fingers on your trackpad to zoom.<br>Click and drag to pan.";
