@@ -35,7 +35,6 @@ export default function InteractiveReporterApp() {
   const [isCenter, setisCenter] = useState(false);
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
-  const [mapComment, setMapComment] = useState("");
 
   useEffect(() => {
     const loadMap = async () => {
@@ -65,6 +64,16 @@ export default function InteractiveReporterApp() {
 
         const zoom = new Zoom({ view });
         view.ui.add(zoom, "bottom-left");
+
+        const infoDiv = document.createElement("div");
+        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
+        infoDiv.style.padding = "6px 12px";
+        infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
+        infoDiv.style.fontSize = "13px";
+        infoDiv.style.borderRadius = "4px";
+        infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+        infoDiv.style.maxWidth = "200px";
+        view.ui.add(infoDiv, "top-left");
 
         const graphicsLayer = new GraphicsLayer.default();
         view.map.add(graphicsLayer);
@@ -240,22 +249,6 @@ export default function InteractiveReporterApp() {
           <Card sx={{ my: 2, mb: 1 }}>
             <CardContent sx={{ height: 500, display: 'flex', position: 'relative' }}>
               <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
-              <TextField
-                value={mapComment}
-                onChange={(e) => setMapComment(e.target.value)}
-                placeholder="🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan."
-                variant="outlined"
-                multiline
-                rows={3}
-                sx={{
-                  position: 'absolute',
-                  top: 10,
-                  left: 10,
-                  width: 'calc(80% - 20px)',
-                  backgroundColor: 'white',
-                  zIndex: 10
-                }}
-              />
               <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
             </CardContent>
           </Card>
