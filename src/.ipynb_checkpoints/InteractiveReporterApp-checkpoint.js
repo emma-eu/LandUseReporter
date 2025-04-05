@@ -82,9 +82,11 @@ export default function InteractiveReporterApp() {
           creationMode: "single",
           visibleElements: {
             createTools: { point: false, polyline: false, rectangle: false, circle: false },
-            selectionTools: { "rectangle-selection": false },
+            selectionTools: false,
             undoRedoMenu: false,
-            settingsMenu: false
+            settingsMenu: false,
+            duplicateButton: false,
+            trashButton: false
           },
           polygonSymbol: {
             type: "simple-fill",
@@ -232,7 +234,7 @@ export default function InteractiveReporterApp() {
   return (
     <>
       <CssBaseline />
-      <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+      <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2} sx={{ backgroundColor: "transparent" }}>
         <Box width="100%" maxWidth="1250px">
           <Typography variant="h4" gutterBottom>
             MAG First Draft Significant Land Uses Map Feedback
@@ -247,8 +249,8 @@ export default function InteractiveReporterApp() {
             </Button>
           </Box>
 
-          <Card sx={{ my: 2, mb: 1 }}>
-            <CardContent sx={{ height: 500, display: 'flex', position: 'relative' }}>
+          <Card sx={{ my: 2, mb: 1, backgroundColor: "transparent", boxShadow: "none" }}>
+            <CardContent sx={{ height: 500, display: 'flex', position: 'relative', backgroundColor: "transparent" }}>
               <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
               <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
             </CardContent>
