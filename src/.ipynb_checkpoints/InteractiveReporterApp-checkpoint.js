@@ -81,7 +81,7 @@ export default function InteractiveReporterApp() {
           view,
           creationMode: "single",
           visibleElements: {
-            createTools: { point: false, polyline: false, rectangle: false, circle: false },
+            createTools: false,
             selectionTools: false,
             undoRedoMenu: false,
             settingsMenu: false,
@@ -99,7 +99,6 @@ export default function InteractiveReporterApp() {
         });
 
         sketchRef.current = sketch;
-        view.ui.add(sketch, "top-right");
 
         sketch.on("create", (event) => {
           if (event.state === "start") {
