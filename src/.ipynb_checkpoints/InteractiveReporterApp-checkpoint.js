@@ -35,6 +35,7 @@ export default function InteractiveReporterApp() {
   const [comment, setComment] = useState("");
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const loadMap = async () => {
@@ -106,24 +107,25 @@ export default function InteractiveReporterApp() {
             alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
           }
           if (event.state === "complete") {
+            event.graphic.attributes = { isUserCreated: true };
             setDrawnGeometry(event.graphic.geometry);
-            setSelectedFeature(null);
+            setSelectedFeature(event.graphic);
             setOpenDrawn(true);
           }
         });
 
         view.on("click", async (event) => {
-  const response = await view.hitTest(event);
-  const result = response.results.find((r) => r.graphic?.attributes);
-  if (result) {
-    const graphic = result.graphic;
-    const isUserCreated = graphic.layer === sketchRef.current?.layer;
-    setSelectedFeature(graphic);
-    setDrawnGeometry(null);
-    setOpenDrawn(isUserCreated);
-    setOpenExisting(!isUserCreated);
-  }
-});
+          const response = await view.hitTest(event);
+          const result = response.results.find((r) => r.graphic?.attributes);
+          if (result) {
+            const graphic = result.graphic;
+            const isUserCreated = graphic.attributes?.isUserCreated === true;
+            setSelectedFeature(graphic);
+            setDrawnGeometry(null);
+            setOpenDrawn(isUserCreated);
+            setOpenExisting(!isUserCreated);
+          }
+        });
       });
     };
 
@@ -184,8 +186,7 @@ export default function InteractiveReporterApp() {
     setDrawnGeometry(null);
   };
 
-  function renderPopup(isDrawn = false) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  function RenderPopup({ isDrawn }) {
     return (
       <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Feature Feedback</DialogTitle>
@@ -218,17 +219,17 @@ export default function InteractiveReporterApp() {
                 </Select>
               </FormControl>
               {!dropdownOpen && (
-  <TextField
-    id="comment-field"
-    label="Comment Here (Optional)"
-    fullWidth
-    margin="dense"
-    multiline
-    rows={4}
-    value={comment}
-    onChange={(e) => setComment(e.target.value)}
-  />
-)}
+                <TextField
+                  id="comment-field"
+                  label="Comment Here (Optional)"
+                  fullWidth
+                  margin="dense"
+                  multiline
+                  rows={4}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              )}
             </Box>
           ) : (
             <>
@@ -298,7 +299,7 @@ export default function InteractiveReporterApp() {
             sx={{ zIndex: 2000 }}
           >
             <div ref={drawerRef}>
-              {renderPopup()}
+              <RenderPopup isDrawn={false} />
             </div>
           </Drawer>
 
@@ -310,7 +311,7 @@ export default function InteractiveReporterApp() {
             sx={{ zIndex: 2000 }}
           >
             <div ref={drawerRef}>
-              {renderPopup(true)}
+              <RenderPopup isDrawn={true} />
             </div>
           </Drawer>
         </Box>
