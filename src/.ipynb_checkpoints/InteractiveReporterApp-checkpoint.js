@@ -108,8 +108,9 @@ export default function InteractiveReporterApp() {
     alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
   }
   if (event.state === "complete") {
-    event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
-    setUserDrawnFeatures((prev) => [...prev, event.graphic]);
+    const uid = crypto.randomUUID();
+    event.graphic.attributes = { uid, tempUserDrawn: true, hasBeenCommented: false };
+    setUserDrawnFeatures((prev) => [...prev, { uid, graphic: event.graphic }]);
     setDrawnGeometry(event.graphic.geometry);
     setSelectedFeature(event.graphic);
     setOpenDrawn(true);
@@ -121,9 +122,9 @@ export default function InteractiveReporterApp() {
   const result = response.results.find((r) => r.graphic?.attributes);
   if (result) {
     const graphic = result.graphic;
-    const isUserCreated = userDrawnFeatures.some(
-      (g) => g.geometry?.toJSON()?.rings?.toString() === graphic.geometry?.toJSON()?.rings?.toString()
-    );
+    const clickedUID = graphic.attributes?.uid;
+    const match = userDrawnFeatures.find((f) => f.uid === clickedUID);
+    const isUserCreated = !!match;
     const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
