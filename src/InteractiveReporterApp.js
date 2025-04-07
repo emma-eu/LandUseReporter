@@ -113,14 +113,17 @@ export default function InteractiveReporterApp() {
         });
 
         view.on("click", async (event) => {
-          const response = await view.hitTest(event);
-          const result = response.results.find((r) => r.graphic?.attributes);
-          if (result) {
-            setSelectedFeature(result.graphic);
-            setDrawnGeometry(null);
-            setOpenExisting(true);
-          }
-        });
+  const response = await view.hitTest(event);
+  const result = response.results.find((r) => r.graphic?.attributes);
+  if (result) {
+    const graphic = result.graphic;
+    const isUserCreated = graphic.layer === sketchRef.current?.layer;
+    setSelectedFeature(graphic);
+    setDrawnGeometry(null);
+    setOpenDrawn(isUserCreated);
+    setOpenExisting(!isUserCreated);
+  }
+});
       });
     };
 
