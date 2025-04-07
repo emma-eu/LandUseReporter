@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+gitimport { useEffect, useRef, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -189,20 +189,21 @@ export default function InteractiveReporterApp() {
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
             <Box sx={{ zIndex: 1500, position: "relative" }}>
-              <FormControl fullWidth sx={{ mb: 1 }}>
-                <InputLabel id="center-label">Land Use Classification</InputLabel>
-                <Select
-                  labelId="center-label"
-                  value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
-                  MenuProps={{ PaperProps: { style: { zIndex: 3000 } } }}
-                >
-                  <MenuItem value="Industrial District">Industrial District</MenuItem>
-                  <MenuItem value="Employment District">Employment District</MenuItem>
-                  <MenuItem value="Educational Center">Educational Center</MenuItem>
-                  <MenuItem value="Retail">Retail</MenuItem>
-                </Select>
-              </FormControl>
+                <FormControl fullWidth sx={{ mb: 1 }}>
+                  <InputLabel id="center-label">Land Use Classification</InputLabel>
+                  <Select
+                    labelId="center-label"
+                    value={priorityLevel}
+                    onChange={(e) => setPriorityLevel(e.target.value)}
+                    MenuProps={{ PaperProps: { style: { zIndex: 3000 } } }}
+                    disablePortal
+                  >
+                    <MenuItem value="Industrial District">Industrial District</MenuItem>
+                    <MenuItem value="Employment District">Employment District</MenuItem>
+                    <MenuItem value="Educational Center">Educational Center</MenuItem>
+                    <MenuItem value="Retail">Retail</MenuItem>
+                  </Select>
+                </FormControl>
               <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
             </Box>
           ) : (
