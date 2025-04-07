@@ -1,4 +1,4 @@
-gitimport { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
