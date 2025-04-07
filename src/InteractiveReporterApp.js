@@ -188,7 +188,7 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {isDrawn ? (
-            <Box sx={{ zIndex: 1500, position: "relative" }}>
+            <Box sx={{ zIndex: 3001, position: "relative" }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
                 Select a classification for this new center:
               </Typography>
@@ -198,8 +198,8 @@ export default function InteractiveReporterApp() {
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   label="Classification"
-                  MenuProps={{ PaperProps: { style: { zIndex: 3000 } } }}
                   disablePortal
+                  MenuProps={{ PaperProps: { style: { zIndex: 3002 } } }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
