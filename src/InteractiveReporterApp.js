@@ -107,7 +107,7 @@ export default function InteractiveReporterApp() {
     alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
   }
   if (event.state === "complete") {
-    event.graphic.attributes = { hasBeenCommented: false };
+    event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
     setDrawnGeometry(event.graphic.geometry);
     setSelectedFeature(event.graphic);
     setOpenDrawn(true);
@@ -119,7 +119,7 @@ export default function InteractiveReporterApp() {
   const result = response.results.find((r) => r.graphic?.attributes);
   if (result) {
     const graphic = result.graphic;
-    const isUserCreated = graphic.layer === sketchRef.current?.layer;
+    const isUserCreated = graphic.attributes?.tempUserDrawn === true;
     const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
@@ -168,7 +168,10 @@ export default function InteractiveReporterApp() {
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-      if (selectedFeature?.attributes) selectedFeature.attributes.hasBeenCommented = true;
+      if (selectedFeature?.attributes) {
+        selectedFeature.attributes.hasBeenCommented = true;
+        selectedFeature.attributes.tempUserDrawn = false;
+      }
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
