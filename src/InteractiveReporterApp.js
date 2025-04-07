@@ -185,6 +185,7 @@ export default function InteractiveReporterApp() {
   };
 
   function renderPopup(isDrawn = false) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
     return (
       <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Feature Feedback</DialogTitle>
@@ -206,14 +207,8 @@ export default function InteractiveReporterApp() {
                     container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
                   }}
-                  onOpen={() => {
-                    const commentField = document.getElementById("comment-field");
-                    if (commentField) commentField.style.display = "none";
-                  }}
-                  onClose={() => {
-                    const commentField = document.getElementById("comment-field");
-                    if (commentField) commentField.style.display = "block";
-                  }}
+                  onOpen={() => setDropdownOpen(true)}
+                  onClose={() => setDropdownOpen(false)}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
@@ -222,16 +217,18 @@ export default function InteractiveReporterApp() {
                   <MenuItem value="Special District">Special District</MenuItem>
                 </Select>
               </FormControl>
-              <TextField
-                id="comment-field"
-                label="Comment Here (Optional)"
-                fullWidth
-                margin="dense"
-                multiline
-                rows={4}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              />
+              {!dropdownOpen && (
+  <TextField
+    id="comment-field"
+    label="Comment Here (Optional)"
+    fullWidth
+    margin="dense"
+    multiline
+    rows={4}
+    value={comment}
+    onChange={(e) => setComment(e.target.value)}
+  />
+)}
             </Box>
           ) : (
             <>
