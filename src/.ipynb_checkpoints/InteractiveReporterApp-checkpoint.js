@@ -233,8 +233,17 @@ export default function InteractiveReporterApp() {
           ) : (
             <>
               <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
-              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
-            </>
+              <TextField
+                id="comment-field"
+                label="Comment Here (Optional)"
+                fullWidth
+                margin="dense"
+                multiline
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                sx={{ position: 'relative', zIndex: 1 }}
+              />
           )}
         </DialogContent>
         <DialogActions>
