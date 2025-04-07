@@ -199,7 +199,10 @@ export default function InteractiveReporterApp() {
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   label="Classification"
                   disablePortal
-                  MenuProps={{ PaperProps: { style: { zIndex: 3002 } } }}
+                  MenuProps={{
+                    container: document.getElementById("drawer-container"),
+                    PaperProps: { style: { zIndex: 3002 } }
+                  }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
@@ -267,7 +270,9 @@ export default function InteractiveReporterApp() {
             ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
             sx={{ zIndex: 2000 }}
           >
-            {renderPopup()}
+            <div id="drawer-container">
+              {renderPopup()}
+            </div>
           </Drawer>
 
           <Drawer
@@ -277,7 +282,9 @@ export default function InteractiveReporterApp() {
             ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
             sx={{ zIndex: 2000 }}
           >
-            {renderPopup(true)}
+            <div id="drawer-container">
+              {renderPopup(true)}
+            </div>
           </Drawer>
         </Box>
       </Box>
