@@ -242,7 +242,7 @@ export default function InteractiveReporterApp() {
                 rows={4}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                sx={{ position: 'relative', zIndex: 1 }}
+                sx={{ mt: 1, position: 'relative' }}
               />
             </>
           )}
