@@ -103,15 +103,16 @@ export default function InteractiveReporterApp() {
         sketchRef.current = sketch;
 
         sketch.on("create", (event) => {
-          if (event.state === "start") {
-            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
-          }
-          if (event.state === "complete") {
-            setDrawnGeometry(event.graphic.geometry);
-            setSelectedFeature(null);
-            setOpenDrawn(true);
-          }
-        });
+  if (event.state === "start") {
+    alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+  }
+  if (event.state === "complete") {
+    event.graphic.attributes = { hasBeenCommented: false };
+    setDrawnGeometry(event.graphic.geometry);
+    setSelectedFeature(event.graphic);
+    setOpenDrawn(true);
+  }
+});
 
         view.on("click", async (event) => {
   const response = await view.hitTest(event);
@@ -119,10 +120,11 @@ export default function InteractiveReporterApp() {
   if (result) {
     const graphic = result.graphic;
     const isUserCreated = graphic.layer === sketchRef.current?.layer;
+    const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
-    setOpenDrawn(isUserCreated);
-    setOpenExisting(!isUserCreated);
+    setOpenDrawn(isUserCreated && !hasBeenCommented);
+    setOpenExisting(!isUserCreated || hasBeenCommented);
   }
 });
       });
@@ -166,6 +168,7 @@ export default function InteractiveReporterApp() {
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
+      if (selectedFeature?.attributes) selectedFeature.attributes.hasBeenCommented = true;
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
