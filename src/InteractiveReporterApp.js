@@ -244,6 +244,7 @@ export default function InteractiveReporterApp() {
                 onChange={(e) => setComment(e.target.value)}
                 sx={{ position: 'relative', zIndex: 1 }}
               />
+            </>
           )}
         </DialogContent>
         <DialogActions>
