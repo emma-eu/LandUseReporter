@@ -194,7 +194,7 @@ export default function InteractiveReporterApp() {
                 Select a classification for this new center:
               </Typography>
               <FormControl fullWidth margin="dense">
-                <InputLabel>Center Classification</InputLabel>
+                <InputLabel>Classification</InputLabel>
                 <Select
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
@@ -202,6 +202,14 @@ export default function InteractiveReporterApp() {
                   MenuProps={{
                     container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
+                  }}
+                  onOpen={() => {
+                    const commentField = document.getElementById("comment-field");
+                    if (commentField) commentField.style.visibility = "hidden";
+                  }}
+                  onClose={() => {
+                    const commentField = document.getElementById("comment-field");
+                    if (commentField) commentField.style.visibility = "visible";
                   }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
@@ -211,7 +219,16 @@ export default function InteractiveReporterApp() {
                   <MenuItem value="Special District">Special District</MenuItem>
                 </Select>
               </FormControl>
-              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+              <TextField
+                id="comment-field"
+                label="Comment Here (Optional)"
+                fullWidth
+                margin="dense"
+                multiline
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
             </Box>
           ) : (
             <>
