@@ -23,6 +23,7 @@ export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
+  const drawerRef = useRef(null);
   const [, setView] = useState(null);
 
   const [openExisting, setOpenExisting] = useState(false);
@@ -198,9 +199,8 @@ export default function InteractiveReporterApp() {
                   value={priorityLevel}
                   onChange={(e) => setPriorityLevel(e.target.value)}
                   label="Classification"
-                  disablePortal
                   MenuProps={{
-                    container: document.getElementById("drawer-container"),
+                    container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
                   }}
                 >
@@ -270,7 +270,7 @@ export default function InteractiveReporterApp() {
             ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
             sx={{ zIndex: 2000 }}
           >
-            <div id="drawer-container">
+            <div ref={drawerRef}>
               {renderPopup()}
             </div>
           </Drawer>
@@ -282,7 +282,7 @@ export default function InteractiveReporterApp() {
             ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
             sx={{ zIndex: 2000 }}
           >
-            <div id="drawer-container">
+            <div ref={drawerRef}>
               {renderPopup(true)}
             </div>
           </Drawer>
