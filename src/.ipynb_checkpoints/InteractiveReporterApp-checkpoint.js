@@ -194,21 +194,12 @@ export default function InteractiveReporterApp() {
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
                    {isDrawn ? (
             <Box sx={{ zIndex: 3001, position: "relative" }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                Select a classification for this new center:
-              </Typography>
               {!dropdownOpen && (
-                <TextField
-                  id="comment-field"
-                  label="Comment Here (Optional)"
-                  fullWidth
-                  margin="dense"
-                  multiline
-                  rows={4}
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-              )}
+  <>
+    <TextField$2</TextField>
+    <Typography$3</Typography>
+  </>
+)}
               <FormControl fullWidth margin="dense">
                 <InputLabel>Classification</InputLabel>
                 <Select
