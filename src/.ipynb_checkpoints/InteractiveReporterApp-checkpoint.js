@@ -38,6 +38,7 @@ export default function InteractiveReporterApp() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userDrawnFeatures, setUserDrawnFeatures] = useState([]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
@@ -207,7 +208,6 @@ export default function InteractiveReporterApp() {
             <Box sx={{ zIndex: 3001, position: "relative" }}>
               {!dropdownOpen && (
   <>
-    <>
     <TextField
       id="comment-field"
       label="Comment Here (Optional)"
@@ -221,7 +221,6 @@ export default function InteractiveReporterApp() {
     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
       Select a classification for this new center:
     </Typography>
-  </>
   </>
 )}
               <FormControl fullWidth margin="dense">
