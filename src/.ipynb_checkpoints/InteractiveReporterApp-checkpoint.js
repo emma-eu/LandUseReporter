@@ -208,11 +208,11 @@ export default function InteractiveReporterApp() {
                   }}
                   onOpen={() => {
                     const commentField = document.getElementById("comment-field");
-                    if (commentField) commentField.style.visibility = "hidden";
+                    if (commentField) commentField.style.display = "none";
                   }}
                   onClose={() => {
                     const commentField = document.getElementById("comment-field");
-                    if (commentField) commentField.style.visibility = "visible";
+                    if (commentField) commentField.style.display = "block";
                   }}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
