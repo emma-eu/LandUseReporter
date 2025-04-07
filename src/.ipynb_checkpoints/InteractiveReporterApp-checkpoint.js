@@ -36,6 +36,7 @@ export default function InteractiveReporterApp() {
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userDrawnFeatures, setUserDrawnFeatures] = useState([]);
 
   useEffect(() => {
     const loadMap = async () => {
@@ -108,6 +109,7 @@ export default function InteractiveReporterApp() {
   }
   if (event.state === "complete") {
     event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
+    setUserDrawnFeatures((prev) => [...prev, event.graphic]);
     setDrawnGeometry(event.graphic.geometry);
     setSelectedFeature(event.graphic);
     setOpenDrawn(true);
@@ -119,7 +121,9 @@ export default function InteractiveReporterApp() {
   const result = response.results.find((r) => r.graphic?.attributes);
   if (result) {
     const graphic = result.graphic;
-    const isUserCreated = graphic.attributes?.tempUserDrawn === true;
+    const isUserCreated = userDrawnFeatures.some(
+      (g) => g.geometry?.toJSON()?.rings?.toString() === graphic.geometry?.toJSON()?.rings?.toString()
+    );
     const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
