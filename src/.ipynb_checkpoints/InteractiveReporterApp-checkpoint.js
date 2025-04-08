@@ -36,9 +36,7 @@ export default function InteractiveReporterApp() {
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userDrawnFeatures, setUserDrawnFeatures] = useState([]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
@@ -109,9 +107,7 @@ export default function InteractiveReporterApp() {
     alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
   }
   if (event.state === "complete") {
-    const uid = crypto.randomUUID();
-    event.graphic.attributes = { uid, tempUserDrawn: true, hasBeenCommented: false };
-    setUserDrawnFeatures((prev) => [...prev, { uid, graphic: event.graphic }]);
+    event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
     setDrawnGeometry(event.graphic.geometry);
     setSelectedFeature(event.graphic);
     setOpenDrawn(true);
@@ -123,9 +119,7 @@ export default function InteractiveReporterApp() {
   const result = response.results.find((r) => r.graphic?.attributes);
   if (result) {
     const graphic = result.graphic;
-    const clickedUID = graphic.attributes?.uid;
-    const match = userDrawnFeatures.find((f) => f.uid === clickedUID);
-    const isUserCreated = !!match;
+    const isUserCreated = graphic.attributes?.tempUserDrawn === true;
     const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
@@ -208,6 +202,7 @@ export default function InteractiveReporterApp() {
             <Box sx={{ zIndex: 3001, position: "relative" }}>
               {!dropdownOpen && (
   <>
+    <>
     <TextField
       id="comment-field"
       label="Comment Here (Optional)"
@@ -221,6 +216,7 @@ export default function InteractiveReporterApp() {
     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
       Select a classification for this new center:
     </Typography>
+  </>
   </>
 )}
               <FormControl fullWidth margin="dense">
@@ -288,7 +284,7 @@ export default function InteractiveReporterApp() {
             MAG First Draft Significant Land Uses Map Feedback
           </Typography>
           <Typography variant="h6" gutterBottom>
-            Click on an existing feature to leave a comment on that feature, or click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature.
+         Click on an existing feature to activate the comment form and leave a comment on that feature. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and enter your information and comment into the popup that appears at right.
           </Typography>
 
           <Box display="flex" gap={2} mb={2}>
