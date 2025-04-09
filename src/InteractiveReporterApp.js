@@ -76,7 +76,7 @@ export default function InteractiveReporterApp() {
         const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
-          creationMode: "single",
+          creationMode: "update",
           visibleElements: {
             createTools: false,
             selectionTools: false,
