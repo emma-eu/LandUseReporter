@@ -178,8 +178,7 @@ export default function InteractiveReporterApp() {
     setLikesProject(false);
     setPriorityLevel("");
     setSelectedFeature(null);
-    setDrawnGeometry(null);
-  };
+      };
 
   function renderPopup(isDrawn = false) {
     return (
