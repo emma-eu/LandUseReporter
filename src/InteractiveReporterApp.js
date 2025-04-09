@@ -26,9 +26,8 @@ export default function InteractiveReporterApp() {
   const drawerRef = useRef(null);
   const [, setView] = useState(null);
 
-  const [openExisting, setOpenExisting] = useState(false);
-  const [openDrawn, setOpenDrawn] = useState(false);
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [open, setOpen] = useState(false);
+    const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
@@ -110,7 +109,7 @@ export default function InteractiveReporterApp() {
     event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
     setDrawnGeometry(event.graphic.geometry);
     setSelectedFeature(event.graphic);
-    setOpenDrawn(true);
+    setOpen(true);
   }
 });
 
@@ -123,8 +122,7 @@ export default function InteractiveReporterApp() {
     const hasBeenCommented = graphic.attributes?.hasBeenCommented;
     setSelectedFeature(graphic);
     setDrawnGeometry(null);
-    setOpenDrawn(isUserCreated && !hasBeenCommented);
-    setOpenExisting(!isUserCreated || hasBeenCommented);
+    setOpen(true);
   }
 });
       });
@@ -154,7 +152,7 @@ export default function InteractiveReporterApp() {
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: drawnGeometry ? 1 : 0,
+        feature_origin: selectedFeature?.attributes?.related_feature_id == null || selectedFeature?.attributes?.related_feature_id === 0 ? 1 : 0,
         name,
         organization,
         submittedcomment: comment,
@@ -181,8 +179,7 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    setOpenExisting(false);
-    setOpenDrawn(false);
+    setOpen(false);
     setName("");
     setComment("");
     setLikesProject(false);
@@ -214,7 +211,7 @@ export default function InteractiveReporterApp() {
       onChange={(e) => setComment(e.target.value)}
     />
     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-      Select a classification for this new center:
+      Select a more accurate classification (if different) OR if this is a feature you created, select its classification:
     </Typography>
   </>
   </>
@@ -259,16 +256,8 @@ export default function InteractiveReporterApp() {
         </DialogContent>
         <DialogActions>
           {drawnGeometry && sketchRef.current && (
-            <Button color="error" onClick={() => {
-              const layer = sketchRef.current.layer;
-              layer.removeAll();
-              setDrawnGeometry(null);
-              setOpenDrawn(false);
-            }}>
-              Delete Feature
-            </Button>
-          )}
-          <Button onClick={() => { isDrawn ? setOpenDrawn(false) : setOpenExisting(false); }}>Cancel</Button>
+                      )}
+          <Button onClick={() => { setOpen(false); }}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
         </DialogActions>
       </Box>
@@ -283,9 +272,20 @@ export default function InteractiveReporterApp() {
           <Typography variant="h4" gutterBottom>
             MAG First Draft Significant Land Uses Map Feedback
           </Typography>
-          <Typography variant="h6" gutterBottom>
-         Click on an existing feature to activate the comment form and leave a comment on that feature. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and enter your information and comment into the popup that appears at right.
-          </Typography>
+          <Typography variant="h6" gutterBottom component="div">
+  <>
+    Click on an existing feature to activate the comment form and leave a comment on that feature.
+    If the classification for the existing feature is incorrect, select the correct classification.
+    <br />
+    You can also click the "ADD A FEATURE" button to draw a new feature on the map.
+    <strong> Double-click </strong>
+    when you have finished digitizing the new feature and then select a classification for your proposed center in the form that appears.
+    <br />
+    <strong>
+      Please note that your edits or new features will not be saved unless you click the blue SUBMIT FEEDBACK button in the pop-up comment form.
+    </strong>
+  </>
+</Typography>
 
           <Box display="flex" gap={2} mb={2}>
             <Button variant="contained" color="primary" onClick={startDrawing}>
@@ -300,27 +300,15 @@ export default function InteractiveReporterApp() {
             </CardContent>
           </Card>
 
-          <Drawer
+                    <Drawer
             anchor="right"
-            open={openExisting}
-            onClose={() => setOpenExisting(false)}
+            open={open}
+            onClose={() => setOpen(false)}
             ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
             sx={{ zIndex: 2000 }}
           >
             <div ref={drawerRef}>
-              {renderPopup()}
-            </div>
-          </Drawer>
-
-          <Drawer
-            anchor="right"
-            open={openDrawn}
-            onClose={() => setOpenDrawn(false)}
-            ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
-            sx={{ zIndex: 2000 }}
-          >
-            <div ref={drawerRef}>
-              {renderPopup(true)}
+              {renderPopup(selectedFeature?.attributes?.tempUserDrawn === true)}
             </div>
           </Drawer>
         </Box>
