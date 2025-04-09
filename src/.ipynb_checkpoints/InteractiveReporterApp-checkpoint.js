@@ -142,18 +142,19 @@ export default function InteractiveReporterApp() {
     const geometry = selectedFeature?.geometry;
     if (!geometry) return;
 
+    const relatedId = selectedFeature?.attributes?.OBJECTID || null;
+
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin:
-          selectedFeature?.attributes?.OBJECTID ? 0 : 1,
+        feature_origin: relatedId == null ? 1 : 0,
         name,
         organization,
         submittedcomment: comment,
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
-        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
+        related_feature_id: relatedId
       },
     };
 
@@ -182,7 +183,7 @@ export default function InteractiveReporterApp() {
       };
 
   function renderPopup() {
-    const isDrawn = selectedFeature?.attributes?.feature_origin === 1 || selectedFeature?.attributes?.tempUserDrawn === true;
+    const isDrawn = selectedFeature?.attributes?.feature_origin === 1 || selectedFeature?.attributes?.tempUserDrawn === true || selectedFeature?.attributes?.related_feature_id == null;
     return (
       <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Comment Form</DialogTitle>
