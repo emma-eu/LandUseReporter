@@ -145,7 +145,11 @@ export default function InteractiveReporterApp() {
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: selectedFeature?.attributes?.tempUserDrawn === true ? 1 : 0,
+        feature_origin:
+          !selectedFeature?.attributes?.related_feature_id ||
+          selectedFeature?.attributes?.related_feature_id === 0
+            ? 1
+            : 0,
         name,
         organization,
         submittedcomment: comment,
