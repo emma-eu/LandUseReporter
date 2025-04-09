@@ -146,7 +146,7 @@ export default function InteractiveReporterApp() {
       geometry,
       attributes: {
         feature_origin:
-          selectedFeature?.attributes?.related_feature_id == null ? 1 : 0,
+          selectedFeature?.attributes?.OBJECTID ? 0 : 1,
         name,
         organization,
         submittedcomment: comment,
@@ -182,7 +182,7 @@ export default function InteractiveReporterApp() {
       };
 
   function renderPopup() {
-    const isDrawn = selectedFeature?.attributes?.tempUserDrawn === true;
+    const isDrawn = selectedFeature?.attributes?.feature_origin === 1 || selectedFeature?.attributes?.tempUserDrawn === true;
     return (
       <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Comment Form</DialogTitle>
@@ -298,7 +298,7 @@ export default function InteractiveReporterApp() {
             sx={{ zIndex: 2000 }}
           >
             <div ref={drawerRef}>
-              {renderPopup(selectedFeature?.attributes?.tempUserDrawn === true)}
+              {renderPopup()}
             </div>
           </Drawer>
         </Box>
