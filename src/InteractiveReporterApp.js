@@ -191,12 +191,12 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {!isDrawn && (
-            <FormControlLabel
-              control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} 
-              label="This feature is correctly classified."
-              sx={{ mb: 1 }}
-            />
-          ) fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+  <FormControlLabel
+    control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} 
+    label="This feature is correctly classified."
+    sx={{ mb: 1 }}
+  />
+)}
                    {isDrawn ? (
             <Box sx={{ zIndex: 3001, position: "relative" }}>
   <>
