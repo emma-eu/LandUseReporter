@@ -255,8 +255,7 @@ export default function InteractiveReporterApp() {
           )}
         </DialogContent>
         <DialogActions>
-          {drawnGeometry && sketchRef.current && (
-                      )}
+          
           <Button onClick={() => { setOpen(false); }}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
         </DialogActions>
