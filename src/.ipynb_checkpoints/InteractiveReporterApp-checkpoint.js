@@ -146,8 +146,8 @@ export default function InteractiveReporterApp() {
       geometry,
       attributes: {
         feature_origin:
-          !selectedFeature?.attributes?.related_feature_id ||
-          selectedFeature?.attributes?.related_feature_id === 0
+          selectedFeature?.attributes?.tempUserDrawn === true ||
+          !selectedFeature?.attributes?.OBJECTID
             ? 1
             : 0,
         name,
@@ -211,7 +211,6 @@ export default function InteractiveReporterApp() {
 </Typography>
   </>
   </>
-)}
               <FormControl fullWidth margin="dense">
                 <InputLabel>Classification</InputLabel>
                 <Select
