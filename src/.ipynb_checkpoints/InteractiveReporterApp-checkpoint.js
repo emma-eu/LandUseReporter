@@ -180,7 +180,8 @@ export default function InteractiveReporterApp() {
     setSelectedFeature(null);
       };
 
-  function renderPopup(isDrawn = false) {
+  function renderPopup() {
+    const isDrawn = selectedFeature?.attributes?.tempUserDrawn === true;
     return (
       <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
         <DialogTitle>Comment Form</DialogTitle>
@@ -202,8 +203,8 @@ export default function InteractiveReporterApp() {
       onChange={(e) => setComment(e.target.value)}
     />
     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-      Select a more accurate classification (if different) OR if this is a feature you created, select its classification:
-    </Typography>
+  If you drew/created this feature, please assign it a classification from the options below:
+</Typography>
   </>
   </>
 )}
