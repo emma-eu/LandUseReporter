@@ -24,18 +24,15 @@ export default function InteractiveReporterApp() {
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
   const drawerRef = useRef(null);
-  const [, setView] = useState(null);
-
+  
   const [open, setOpen] = useState(false);
     const [selectedFeature, setSelectedFeature] = useState(null);
-  const [drawnGeometry, setDrawnGeometry] = useState(null);
-  const [name, setName] = useState("");
+    const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
+  
   useEffect(() => {
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
@@ -57,8 +54,7 @@ export default function InteractiveReporterApp() {
         ui: { components: ["zoom", "attribution"] },
       });
 
-      setView(view);
-
+      
       view.when(() => {
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
@@ -107,8 +103,7 @@ export default function InteractiveReporterApp() {
   }
   if (event.state === "complete") {
     event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
-    setDrawnGeometry(event.graphic.geometry);
-    setSelectedFeature(event.graphic);
+        setSelectedFeature(event.graphic);
     setOpen(true);
   }
 });
@@ -118,11 +113,9 @@ export default function InteractiveReporterApp() {
   const result = response.results.find((r) => r.graphic?.attributes);
   if (result) {
     const graphic = result.graphic;
-    const isUserCreated = graphic.attributes?.tempUserDrawn === true;
-    const hasBeenCommented = graphic.attributes?.hasBeenCommented;
+    
     setSelectedFeature(graphic);
-    setDrawnGeometry(null);
-    setOpen(true);
+        setOpen(true);
   }
 });
       });
@@ -146,7 +139,7 @@ export default function InteractiveReporterApp() {
       url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer/0",
     });
 
-    const geometry = selectedFeature?.geometry || drawnGeometry;
+    const geometry = selectedFeature?.geometry;
     if (!geometry) return;
 
     const newFeature = {
@@ -197,7 +190,6 @@ export default function InteractiveReporterApp() {
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
                    {isDrawn ? (
             <Box sx={{ zIndex: 3001, position: "relative" }}>
-              {!dropdownOpen && (
   <>
     <>
     <TextField
@@ -226,8 +218,7 @@ export default function InteractiveReporterApp() {
                     container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
                   }}
-                  onOpen={() => setDropdownOpen(true)}
-                  onClose={() => setDropdownOpen(false)}
+                  
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
