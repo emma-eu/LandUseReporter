@@ -32,6 +32,10 @@ export default function InteractiveReporterApp() {
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
+    import("@arcgis/core/config").then(({ default: esriConfig }) => {
+        esriConfig.assetsPath = "./esri"; // Ensures assets load correctly from GitHub Pages subpath
+    });
+
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
