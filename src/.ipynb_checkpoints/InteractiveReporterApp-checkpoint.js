@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import CssBaseline from "@mui/material/CssBaseline";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
@@ -117,8 +116,14 @@ export default function InteractiveReporterApp() {
             const graphic = result.graphic;
             const isDrawn = graphic.attributes?.tempUserDrawn === true;
 
+            // If it's an existing feature, open the popup for leaving a comment
+            if (!isDrawn) {
+              setSelectedFeature(graphic);  // select the clicked feature
+              setDrawnGeometry(graphic.geometry);
+              setOpen(true);
+            }
             // Only open popup for user-drawn features
-            if (isDrawn) {
+            else if (isDrawn) {
               setSelectedFeature(graphic);
               setDrawnGeometry(graphic.geometry);
               setOpen(true);
@@ -148,11 +153,12 @@ export default function InteractiveReporterApp() {
     if (!geometry) return;
 
     const relatedId = selectedFeature?.attributes?.OBJECTID || null;
+    const featureOrigin = selectedFeature?.attributes?.tempUserDrawn ? 1 : 0; // 1 for user-created, 0 for existing features
 
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: relatedId == null ? 1 : 0,
+        feature_origin: featureOrigin,
         name,
         organization,
         submittedcomment: comment,
@@ -176,9 +182,6 @@ export default function InteractiveReporterApp() {
     }
 
     setOpen(false);
-    if (sketchRef.current && selectedFeature?.attributes?.tempUserDrawn) {
-      sketchRef.current.layer.remove(selectedFeature); // remove user-created feature from the map
-    }
     setName("");
     setComment("");
     setLikesProject(false);
@@ -245,7 +248,9 @@ export default function InteractiveReporterApp() {
               </FormControl>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleDeleteSketch} color="secondary">Delete Sketch</Button>
+              {selectedFeature?.attributes?.tempUserDrawn !== true && (
+                <Button onClick={handleDeleteSketch} color="secondary">Delete Sketch</Button>
+              )}
               <Button onClick={() => { setOpen(false); }}>Cancel</Button>
               <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
             </DialogActions>
