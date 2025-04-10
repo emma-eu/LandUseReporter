@@ -124,6 +124,13 @@ export default function InteractiveReporterApp() {
             const hasBeenCommented = graphic.attributes?.hasBeenCommented;
             setSelectedFeature(graphic);
             setDrawnGeometry(null);
+            if (graphic.attributes) {
+              setName(graphic.attributes.name || "");
+              setOrganization(graphic.attributes.organization || "");
+              setComment(graphic.attributes.submittedcomment || "");
+              setLikesProject(graphic.attributes.correct_type === 1);
+              setPriorityLevel(graphic.attributes.updated_type || "");
+            }
             setOpenDrawn(isUserCreated && !hasBeenCommented);
             setOpenExisting(!isUserCreated || hasBeenCommented);
           }
