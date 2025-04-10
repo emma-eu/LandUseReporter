@@ -14,7 +14,6 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
-import Graphic from "@arcgis/core/Graphic";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
 export default function InteractiveReporterApp() {
@@ -128,11 +127,11 @@ export default function InteractiveReporterApp() {
             setComment(graphic.attributes?.submittedcomment || "");
             setPriorityLevel(graphic.attributes?.updated_type || "");
             if (isUserCreated && sketchRef.current) {
+              sketchRef.current.cancel(); // Deselect previous
               sketchRef.current.update([graphic], { tool: "reshape" });
             }
             setOpen(true);
           } else {
-            // Deselect all if clicking away
             if (sketchRef.current) {
               sketchRef.current.cancel();
             }
