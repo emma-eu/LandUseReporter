@@ -32,7 +32,6 @@ export default function InteractiveReporterApp() {
   const [comment, setComment] = useState("");
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const loadMap = async () => {
@@ -220,8 +219,6 @@ export default function InteractiveReporterApp() {
                     container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
                   }}
-                  onOpen={() => setDropdownOpen(true)}
-                  onClose={() => setDropdownOpen(false)}
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
