@@ -18,16 +18,15 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
 import "@arcgis/core/assets/esri/themes/light/main.css";
+import esriConfig from "@arcgis/core/config";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
-  const drawerRef = useRef(null);
   const [, setView] = useState(null);
 
-  const [openExisting, setOpenExisting] = useState(false);
-  const [openDrawn, setOpenDrawn] = useState(false);
+  const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
   const [name, setName] = useState("");
@@ -35,15 +34,17 @@ export default function InteractiveReporterApp() {
   const [comment, setComment] = useState("");
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
+    const basePath = window.location.pathname.includes('LandUseReporter') ? '/LandUseReporter/esri' : '/esri';
+    esriConfig.assetsPath = basePath;
+
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
         import("@arcgis/core/WebMap"),
         import("@arcgis/core/widgets/Sketch"),
-        import("@arcgis/core/layers/GraphicsLayer"),
+        import("@arcgis/core/layers/GraphicsLayer")
       ]);
 
       const webmap = new WebMap.default({
@@ -61,6 +62,11 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(() => {
+        view.popup.autoOpenEnabled = false;
+
+        const graphicsLayer = new GraphicsLayer.default({ popupEnabled: false });
+        view.map.add(graphicsLayer);
+
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -69,64 +75,77 @@ export default function InteractiveReporterApp() {
         infoDiv.style.borderRadius = "4px";
         infoDiv.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
         infoDiv.style.maxWidth = "200px";
-        infoDiv.style.zIndex = "9999";
         view.ui.add(infoDiv, "top-left");
 
-        const legend = new Legend({ view });
-        if (legendRef.current) legend.container = legendRef.current;
-
-        const graphicsLayer = new GraphicsLayer.default();
-        view.map.add(graphicsLayer);
+        new Legend({ view, container: legendRef.current });
 
         const sketch = new Sketch.default({
           layer: graphicsLayer,
           view,
           creationMode: "single",
+          updateOnGraphicClick: false,
           visibleElements: {
-            createTools: false,
-            selectionTools: false,
-            undoRedoMenu: false,
-            settingsMenu: false,
-            duplicateButton: false,
-            trashButton: false
+            createTools: { point: false, polyline: false, rectangle: false, circle: false },
+            selectionTools: { "rectangle-selection": false },
+            undoRedoMenu: false
+          },
+          defaultUpdateOptions: {
+            tool: "reshape",
+            enableRotation: false,
+            enableScaling: false,
+            preserveAspectRatio: false,
+            multipleSelectionEnabled: false
           },
           polygonSymbol: {
             type: "simple-fill",
             color: [0, 255, 255, 0.3],
-            outline: {
-              color: [0, 180, 180, 1],
-              width: 2
-            }
+            outline: { color: [0, 180, 180, 1], width: 2 }
           }
         });
 
         sketchRef.current = sketch;
 
         sketch.on("create", (event) => {
-  if (event.state === "start") {
-    alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
-  }
-  if (event.state === "complete") {
-    event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
-    setDrawnGeometry(event.graphic.geometry);
-    setSelectedFeature(event.graphic);
-    setOpenDrawn(true);
-  }
-});
+          if (event.state === "start") {
+            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          }
+          if (event.state === "complete") {
+            const userGraphic = event.graphic;
+            userGraphic.attributes = { feature_origin: 1 };
+            sketch.update([userGraphic], { tool: "reshape" });
+            setSelectedFeature(userGraphic);
+            setDrawnGeometry(userGraphic.geometry);
+            setOpen(true);
+          }
+        });
 
         view.on("click", async (event) => {
-  const response = await view.hitTest(event);
-  const result = response.results.find((r) => r.graphic?.attributes);
-  if (result) {
-    const graphic = result.graphic;
-    const isUserCreated = graphic.attributes?.tempUserDrawn === true;
-    const hasBeenCommented = graphic.attributes?.hasBeenCommented;
-    setSelectedFeature(graphic);
-    setDrawnGeometry(null);
-    setOpenDrawn(isUserCreated && !hasBeenCommented);
-    setOpenExisting(!isUserCreated || hasBeenCommented);
-  }
-});
+          const response = await view.hitTest(event);
+          const result = response.results.find((r) => r.graphic?.geometry);
+
+          if (result) {
+            const graphic = result.graphic;
+            const isDrawn = graphic.attributes?.feature_origin === 1;
+
+            if (isDrawn) {
+              setSelectedFeature(graphic);
+              setDrawnGeometry(graphic.geometry);
+              setOpen(true);
+            } else {
+              const clonedGeometry = graphic.geometry.clone();
+              const commentGraphic = {
+                geometry: clonedGeometry,
+                attributes: {
+                  feature_origin: 0,
+                  OBJECTID: graphic.attributes?.OBJECTID
+                }
+              };
+              setSelectedFeature(commentGraphic);
+              setDrawnGeometry(clonedGeometry);
+              setOpen(true);
+            }
+          }
+        });
       });
     };
 
@@ -134,14 +153,12 @@ export default function InteractiveReporterApp() {
   }, []);
 
   const startDrawing = () => {
-    if (sketchRef.current) {
-      sketchRef.current.create("polygon");
-    }
+    if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
   const handleSubmit = async () => {
     const [FeatureLayer] = await Promise.all([
-      import("@arcgis/core/layers/FeatureLayer"),
+      import("@arcgis/core/layers/FeatureLayer")
     ]);
 
     const responseLayer = new FeatureLayer.default({
@@ -151,27 +168,26 @@ export default function InteractiveReporterApp() {
     const geometry = selectedFeature?.geometry || drawnGeometry;
     if (!geometry) return;
 
+    const relatedId = selectedFeature?.attributes?.OBJECTID || null;
+    const featureOrigin = selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0;
+
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: drawnGeometry ? 1 : 0,
+        feature_origin: featureOrigin,
         name,
         organization,
         submittedcomment: comment,
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
-        related_feature_id: selectedFeature?.attributes?.OBJECTID || null
+        related_feature_id: relatedId
       },
     };
 
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-      if (selectedFeature?.attributes) {
-        selectedFeature.attributes.hasBeenCommented = true;
-        selectedFeature.attributes.tempUserDrawn = false;
-      }
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
@@ -181,8 +197,7 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    setOpenExisting(false);
-    setOpenDrawn(false);
+    setOpen(false);
     setName("");
     setComment("");
     setLikesProject(false);
@@ -191,47 +206,53 @@ export default function InteractiveReporterApp() {
     setDrawnGeometry(null);
   };
 
-  function renderPopup(isDrawn = false) {
-    return (
-      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
-        <DialogTitle>Comment Form</DialogTitle>
-        <DialogContent>
-          <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-                   {isDrawn ? (
-            <Box sx={{ zIndex: 3001, position: "relative" }}>
-              {!dropdownOpen && (
-  <>
-    <>
-    <TextField
-      id="comment-field"
-      label="Comment Here (Optional)"
-      fullWidth
-      margin="dense"
-      multiline
-      rows={4}
-      value={comment}
-      onChange={(e) => setComment(e.target.value)}
-    />
-    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-      Select a classification for this new center:
-    </Typography>
-  </>
-  </>
-)}
+  const handleDeleteSketch = () => {
+    if (
+      selectedFeature &&
+      selectedFeature.attributes?.feature_origin === 1 &&
+      !selectedFeature.attributes?.OBJECTID &&
+      sketchRef.current
+    ) {
+      sketchRef.current.layer.remove(selectedFeature);
+    }
+    setOpen(false);
+    setSelectedFeature(null);
+    setDrawnGeometry(null);
+  };
+
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
+      <Box width="100%" maxWidth="1250px">
+        <Typography variant="h4" gutterBottom>
+          MAG First Draft Significant Land Uses Map Feedback
+        </Typography>
+        <Box display="flex" gap={2} mb={2}>
+          <Button variant="contained" color="primary" onClick={startDrawing}>
+            Add A Feature
+          </Button>
+        </Box>
+
+        <Card sx={{ my: 2, mb: 1 }}>
+          <CardContent sx={{ height: 450, display: 'flex', position: 'relative' }}>
+            <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2, position: "relative" }} />
+            <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
+          </CardContent>
+        </Card>
+
+        <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+          <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+            <DialogTitle>Comment Form</DialogTitle>
+            <DialogContent>
+              <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+              <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                If you drew this feature, please provide its classification from the options below:
+              </Typography>
+
               <FormControl fullWidth margin="dense">
                 <InputLabel>Classification</InputLabel>
-                <Select
-                  value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
-                  label="Classification"
-                  MenuProps={{
-                    container: drawerRef.current,
-                    PaperProps: { style: { zIndex: 3002 } }
-                  }}
-                  onOpen={() => setDropdownOpen(true)}
-                  onClose={() => setDropdownOpen(false)}
-                >
+                <Select value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)} label="Classification">
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
                   <MenuItem value="Educational Center">Educational Center</MenuItem>
@@ -239,92 +260,19 @@ export default function InteractiveReporterApp() {
                   <MenuItem value="Special District">Special District</MenuItem>
                 </Select>
               </FormControl>
-            </Box>
-          ) : (
-            <>
-              <FormControlLabel control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} label="This feature is correctly classified." />
-              <TextField
-                id="comment-field"
-                label="Comment Here (Optional)"
-                fullWidth
-                margin="dense"
-                multiline
-                rows={4}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                sx={{ mt: 1, position: 'relative' }}
-              />
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          {drawnGeometry && sketchRef.current && (
-            <Button color="error" onClick={() => {
-              const layer = sketchRef.current.layer;
-              layer.removeAll();
-              setDrawnGeometry(null);
-              setOpenDrawn(false);
-            }}>
-              Delete Feature
-            </Button>
-          )}
-          <Button onClick={() => { isDrawn ? setOpenDrawn(false) : setOpenExisting(false); }}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
-        </DialogActions>
-      </Box>
-    );
-  }
 
-  return (
-    <>
-      <CssBaseline />
-      <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2} sx={{ backgroundColor: "transparent" }}>
-        <Box width="100%" maxWidth="1250px">
-          <Typography variant="h4" gutterBottom>
-            MAG First Draft Significant Land Uses Map Feedback
-          </Typography>
-          <Typography variant="h6" gutterBottom>
-         Click on an existing feature to activate the comment form and leave a comment on that feature. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and enter your information and comment into the popup that appears at right.
-          </Typography>
-
-          <Box display="flex" gap={2} mb={2}>
-            <Button variant="contained" color="primary" onClick={startDrawing}>
-              Add A Feature
-            </Button>
+              <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDeleteSketch} color="secondary">
+                DELETE SKETCH
+              </Button>
+              <Button onClick={() => setOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+            </DialogActions>
           </Box>
-
-          <Card sx={{ my: 2, mb: 1, backgroundColor: "transparent", boxShadow: "none" }}>
-            <CardContent sx={{ height: 500, display: 'flex', position: 'relative', backgroundColor: "transparent" }}>
-              <div ref={mapRef} style={{ width: "80%", height: "100%", borderRadius: 2 }} />
-              <div ref={legendRef} style={{ width: "20%", minWidth: 200, paddingLeft: 10, overflowY: "auto" }} />
-            </CardContent>
-          </Card>
-
-          <Drawer
-            anchor="right"
-            open={openExisting}
-            onClose={() => setOpenExisting(false)}
-            ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
-            sx={{ zIndex: 2000 }}
-          >
-            <div ref={drawerRef}>
-              {renderPopup()}
-            </div>
-          </Drawer>
-
-          <Drawer
-            anchor="right"
-            open={openDrawn}
-            onClose={() => setOpenDrawn(false)}
-            ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
-            sx={{ zIndex: 2000 }}
-          >
-            <div ref={drawerRef}>
-              {renderPopup(true)}
-            </div>
-          </Drawer>
-        </Box>
+        </Drawer>
       </Box>
-    </>
+    </Box>
   );
 }
