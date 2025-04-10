@@ -57,6 +57,7 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(() => {
+        view.popup.autoOpenEnabled = false;
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
         infoDiv.style.padding = "6px 12px";
@@ -78,21 +79,23 @@ export default function InteractiveReporterApp() {
           layer: graphicsLayer,
           view,
           creationMode: "single",
+          updateOnGraphicClick: false,
           visibleElements: {
-            createTools: false,
-            selectionTools: false,
+            createTools: { point: false, polyline: false, rectangle: false, circle: false },
+            selectionTools: { "rectangle-selection": false },
             undoRedoMenu: false,
-            settingsMenu: false,
-            duplicateButton: false,
-            trashButton: false
+          },
+          defaultUpdateOptions: {
+            tool: "reshape",
+            enableRotation: false,
+            enableScaling: false,
+            preserveAspectRatio: false,
+            multipleSelectionEnabled: false
           },
           polygonSymbol: {
             type: "simple-fill",
             color: [0, 255, 255, 0.3],
-            outline: {
-              color: [0, 180, 180, 1],
-              width: 2
-            }
+            outline: { color: [0, 180, 180, 1], width: 2 }
           }
         });
 
@@ -103,10 +106,11 @@ export default function InteractiveReporterApp() {
             alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
           }
           if (event.state === "complete") {
-            event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
-            sketch.update([event.graphic], { tool: "reshape" });
-            setDrawnGeometry(event.graphic.geometry);
-            setSelectedFeature(event.graphic);
+            const graphic = event.graphic;
+            graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
+            sketch.update([graphic], { tool: "reshape" });
+            setDrawnGeometry(graphic.geometry);
+            setSelectedFeature(graphic);
             setOpenDrawn(true);
           }
         });
@@ -165,11 +169,10 @@ export default function InteractiveReporterApp() {
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-        if (selectedFeature?.attributes) {
-          selectedFeature.attributes.hasBeenCommented = true;
-          selectedFeature.attributes.tempUserDrawn = false;
+        if (selectedFeature?.attributes?.tempUserDrawn && sketchRef.current) {
+          sketchRef.current.layer.remove(selectedFeature);
+          sketchRef.current.cancel();
         }
-        sketchRef.current?.complete();
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
