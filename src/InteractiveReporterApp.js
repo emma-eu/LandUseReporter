@@ -15,6 +15,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
 import "@arcgis/core/assets/esri/themes/light/main.css";
+import esriConfig from "@arcgis/core/config";
 
 export default function InteractiveReporterApp() {
   const mapRef = useRef(null);
@@ -32,10 +33,12 @@ export default function InteractiveReporterApp() {
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
-    import("@arcgis/core/config").then(({ default: esriConfig }) => {
-        esriConfig.assetsPath = "./esri"; // Ensures assets load correctly from GitHub Pages subpath
-    });
-
+    const basePath = window.location.pathname.includes('LandUseReporter')
+      ? '/LandUseReporter/esri'
+      : '/esri';
+      
+    esriConfig.assetsPath = basePath;
+      
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
