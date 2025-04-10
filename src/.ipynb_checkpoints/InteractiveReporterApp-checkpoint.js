@@ -14,6 +14,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Legend from "@arcgis/core/widgets/Legend";
+import Graphic from "@arcgis/core/Graphic";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 
 export default function InteractiveReporterApp() {
@@ -57,7 +58,7 @@ export default function InteractiveReporterApp() {
       view.when(() => {
         view.popup.autoOpenEnabled = false;
         const infoDiv = document.createElement("div");
-        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
+        infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan. To close a feature's informational popup, click the X in the popup's upper right corner or click elsewhere on the map";
         infoDiv.style.padding = "6px 12px";
         infoDiv.style.background = "rgba(255, 255, 255, 0.9)";
         infoDiv.style.fontSize = "13px";
@@ -119,13 +120,23 @@ export default function InteractiveReporterApp() {
 
           if (result) {
             const graphic = result.graphic;
+            const isUserCreated = graphic.attributes?.feature_origin === 1;
             setSelectedFeature(graphic);
             setDrawnGeometry(graphic.geometry);
             setName(graphic.attributes?.name || "");
             setOrganization(graphic.attributes?.organization || "");
             setComment(graphic.attributes?.submittedcomment || "");
             setPriorityLevel(graphic.attributes?.updated_type || "");
+            if (isUserCreated && sketchRef.current) {
+              sketchRef.current.update([graphic], { tool: "reshape" });
+            }
             setOpen(true);
+          } else {
+            // Deselect all if clicking away
+            if (sketchRef.current) {
+              sketchRef.current.cancel();
+            }
+            setOpen(false);
           }
         });
       });
@@ -219,7 +230,10 @@ export default function InteractiveReporterApp() {
         <Drawer
           anchor="right"
           open={open}
-          onClose={() => setOpen(false)}
+          onClose={() => {
+            setOpen(false);
+            if (sketchRef.current) sketchRef.current.cancel();
+          }}
           ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
           sx={{ zIndex: 2000 }}
         >
@@ -270,7 +284,10 @@ export default function InteractiveReporterApp() {
                 >
                   DELETE SKETCH
                 </Button>
-                <Button onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  setOpen(false);
+                  if (sketchRef.current) sketchRef.current.cancel();
+                }}>Cancel</Button>
                 <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
               </DialogActions>
             </Box>
