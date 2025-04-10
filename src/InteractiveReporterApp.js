@@ -23,14 +23,12 @@ export default function InteractiveReporterApp() {
   const drawerRef = useRef(null);
   const [, setView] = useState(null);
 
-  const [openExisting, setOpenExisting] = useState(false);
-  const [openDrawn, setOpenDrawn] = useState(false);
+  const [open, setOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [drawnGeometry, setDrawnGeometry] = useState(null);
   const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
-  const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
 
   useEffect(() => {
@@ -107,32 +105,33 @@ export default function InteractiveReporterApp() {
           }
           if (event.state === "complete") {
             const graphic = event.graphic;
-            graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
+            graphic.attributes = {
+              feature_origin: 1,
+              name: name,
+              organization: organization,
+              submittedcomment: comment,
+              updated_type: priorityLevel
+            };
             sketch.update([graphic], { tool: "reshape" });
-            setDrawnGeometry(graphic.geometry);
             setSelectedFeature(graphic);
-            setOpenDrawn(true);
+            setDrawnGeometry(graphic.geometry);
+            setOpen(true);
           }
         });
 
         view.on("click", async (event) => {
           const response = await view.hitTest(event);
-          const result = response.results.find((r) => r.graphic?.attributes);
+          const result = response.results.find((r) => r.graphic?.geometry);
+
           if (result) {
             const graphic = result.graphic;
-            const isUserCreated = graphic.attributes?.tempUserDrawn === true;
-            const hasBeenCommented = graphic.attributes?.hasBeenCommented;
             setSelectedFeature(graphic);
-            setDrawnGeometry(null);
-            if (graphic.attributes) {
-              setName(graphic.attributes.name || "");
-              setOrganization(graphic.attributes.organization || "");
-              setComment(graphic.attributes.submittedcomment || "");
-              setLikesProject(graphic.attributes.correct_type === 1);
-              setPriorityLevel(graphic.attributes.updated_type || "");
-            }
-            setOpenDrawn(isUserCreated && !hasBeenCommented);
-            setOpenExisting(!isUserCreated || hasBeenCommented);
+            setDrawnGeometry(graphic.geometry);
+            setName(graphic.attributes?.name || "");
+            setOrganization(graphic.attributes?.organization || "");
+            setComment(graphic.attributes?.submittedcomment || "");
+            setPriorityLevel(graphic.attributes?.updated_type || "");
+            setOpen(true);
           }
         });
       });
@@ -142,9 +141,7 @@ export default function InteractiveReporterApp() {
   }, []);
 
   const startDrawing = () => {
-    if (sketchRef.current) {
-      sketchRef.current.create("polygon");
-    }
+    if (sketchRef.current) sketchRef.current.create("polygon");
   };
 
   const handleSubmit = async () => {
@@ -162,11 +159,11 @@ export default function InteractiveReporterApp() {
     const newFeature = {
       geometry,
       attributes: {
-        feature_origin: drawnGeometry ? 1 : 0,
+        feature_origin: 1,
         name,
         organization,
         submittedcomment: comment,
-        correct_type: likesProject ? 1 : 0,
+        correct_type: 1,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
@@ -176,7 +173,7 @@ export default function InteractiveReporterApp() {
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-        if (selectedFeature?.attributes?.tempUserDrawn && sketchRef.current) {
+        if (selectedFeature?.attributes?.feature_origin === 1 && sketchRef.current) {
           sketchRef.current.layer.remove(selectedFeature);
           sketchRef.current.cancel();
         }
@@ -189,81 +186,23 @@ export default function InteractiveReporterApp() {
       console.error("Error submitting feature:", error);
     }
 
-    setOpenExisting(false);
-    setOpenDrawn(false);
+    setOpen(false);
     setName("");
     setComment("");
-    setLikesProject(false);
+    setSelectedFeature(null);
+    setDrawnGeometry(null);
+    setOrganization("");
     setPriorityLevel("");
+  };
+
+  const handleDeleteSketch = () => {
+    if (selectedFeature?.geometry && sketchRef.current) {
+      sketchRef.current.layer.remove(selectedFeature);
+    }
+    setOpen(false);
     setSelectedFeature(null);
     setDrawnGeometry(null);
   };
-
-  function renderPopup(isDrawn = false) {
-    return (
-      <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
-        <DialogTitle>Comment Form</DialogTitle>
-        <DialogContent>
-          <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-          <TextField
-            id="comment-field"
-            label="Comment Here (Optional)"
-            fullWidth
-            margin="dense"
-            multiline
-            rows={4}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          {isDrawn && (
-            <>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                Select a classification for this new center:
-              </Typography>
-              <FormControl fullWidth margin="dense">
-                <InputLabel>Classification</InputLabel>
-                <Select
-                  value={priorityLevel}
-                  onChange={(e) => setPriorityLevel(e.target.value)}
-                  label="Classification"
-                  MenuProps={{
-                    container: drawerRef.current,
-                    PaperProps: { style: { zIndex: 3002 } }
-                  }}
-                >
-                  <MenuItem value="Industrial District">Industrial District</MenuItem>
-                  <MenuItem value="Employment District">Employment District</MenuItem>
-                  <MenuItem value="Educational Center">Educational Center</MenuItem>
-                  <MenuItem value="Retail">Retail</MenuItem>
-                  <MenuItem value="Special District">Special District</MenuItem>
-                </Select>
-              </FormControl>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          {drawnGeometry && sketchRef.current && (
-            <Button
-              variant="outlined"
-              color="error"
-              sx={{ fontWeight: 600 }}
-              onClick={() => {
-                const layer = sketchRef.current.layer;
-                layer.removeAll();
-                setDrawnGeometry(null);
-                setOpenDrawn(false);
-              }}
-            >
-              DELETE SKETCH
-            </Button>
-          )}
-          <Button onClick={() => { isDrawn ? setOpenDrawn(false) : setOpenExisting(false); }}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
-        </DialogActions>
-      </Box>
-    );
-  }
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
@@ -284,24 +223,62 @@ export default function InteractiveReporterApp() {
         </Card>
         <Drawer
           anchor="right"
-          open={openExisting}
-          onClose={() => setOpenExisting(false)}
+          open={open}
+          onClose={() => setOpen(false)}
           ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
           sx={{ zIndex: 2000 }}
         >
           <div ref={drawerRef}>
-            {renderPopup()}
-          </div>
-        </Drawer>
-        <Drawer
-          anchor="right"
-          open={openDrawn}
-          onClose={() => setOpenDrawn(false)}
-          ModalProps={{ keepMounted: true, disableEnforceFocus: true }}
-          sx={{ zIndex: 2000 }}
-        >
-          <div ref={drawerRef}>
-            {renderPopup(true)}
+            <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
+              <DialogTitle>Comment Form</DialogTitle>
+              <DialogContent>
+                <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
+                <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
+                <TextField
+                  id="comment-field"
+                  label="Comment Here (Optional)"
+                  fullWidth
+                  margin="dense"
+                  multiline
+                  rows={4}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                  Select a classification for this new center:
+                </Typography>
+                <FormControl fullWidth margin="dense">
+                  <InputLabel>Classification</InputLabel>
+                  <Select
+                    value={priorityLevel}
+                    onChange={(e) => setPriorityLevel(e.target.value)}
+                    label="Classification"
+                    MenuProps={{
+                      container: drawerRef.current,
+                      PaperProps: { style: { zIndex: 3002 } }
+                    }}
+                  >
+                    <MenuItem value="Industrial District">Industrial District</MenuItem>
+                    <MenuItem value="Employment District">Employment District</MenuItem>
+                    <MenuItem value="Educational Center">Educational Center</MenuItem>
+                    <MenuItem value="Retail">Retail</MenuItem>
+                    <MenuItem value="Special District">Special District</MenuItem>
+                  </Select>
+                </FormControl>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ fontWeight: 600 }}
+                  onClick={handleDeleteSketch}
+                >
+                  DELETE SKETCH
+                </Button>
+                <Button onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
+              </DialogActions>
+            </Box>
           </div>
         </Drawer>
       </Box>
