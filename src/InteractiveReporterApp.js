@@ -36,9 +36,9 @@ export default function InteractiveReporterApp() {
     const basePath = window.location.pathname.includes('LandUseReporter')
       ? '/LandUseReporter/esri'
       : '/esri';
-      
+
     esriConfig.assetsPath = basePath;
-      
+
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
         import("@arcgis/core/views/MapView"),
@@ -48,7 +48,7 @@ export default function InteractiveReporterApp() {
       ]);
 
       const webmap = new WebMap.default({
-        portalItem: { id: "18f4d3e4ab4045a48c80553a693294bb" }, // your webmap
+        portalItem: { id: "18f4d3e4ab4045a48c80553a693294bb" },
       });
 
       const view = new MapView.default({
@@ -62,6 +62,8 @@ export default function InteractiveReporterApp() {
       setView(view);
 
       view.when(async () => {
+        view.popup.autoOpenEnabled = false;
+
         const graphicsLayer = new GraphicsLayer.default({ popupEnabled: false });
         view.map.add(graphicsLayer);
 
@@ -109,10 +111,8 @@ export default function InteractiveReporterApp() {
           }
           if (event.state === "complete") {
             const userGraphic = event.graphic;
-            userGraphic.attributes = { tempUserDrawn: true }; // mark the feature as user-drawn
-
+            userGraphic.attributes = { feature_origin: 1 };
             sketch.update([userGraphic], { tool: "reshape" });
-
             setSelectedFeature(userGraphic);
             setDrawnGeometry(userGraphic.geometry);
             setOpen(true);
@@ -125,7 +125,7 @@ export default function InteractiveReporterApp() {
 
           if (result) {
             const graphic = result.graphic;
-            const isDrawn = graphic.attributes?.tempUserDrawn === true;
+            const isDrawn = graphic.attributes?.feature_origin === 1;
 
             if (isDrawn) {
               setSelectedFeature(graphic);
@@ -136,8 +136,8 @@ export default function InteractiveReporterApp() {
               const commentGraphic = {
                 geometry: clonedGeometry,
                 attributes: {
-                  feature_origin: 0, // Mark as comment on existing feature
-                  OBJECTID: graphic.attributes?.OBJECTID // Link to original feature
+                  feature_origin: 0,
+                  OBJECTID: graphic.attributes?.OBJECTID
                 }
               };
               setSelectedFeature(commentGraphic);
@@ -162,14 +162,14 @@ export default function InteractiveReporterApp() {
     ]);
 
     const responseLayer = new FeatureLayer.default({
-      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer/0", // your feature layer
+      url: "https://services6.arcgis.com/MLUVmF7LMfvzoHjV/arcgis/rest/services/LandUseResponses/FeatureServer/0",
     });
 
     const geometry = selectedFeature?.geometry || drawnGeometry;
     if (!geometry) return;
 
     const relatedId = selectedFeature?.attributes?.OBJECTID || null;
-    const featureOrigin = selectedFeature?.attributes?.tempUserDrawn ? 1 : 0;
+    const featureOrigin = selectedFeature?.attributes?.feature_origin === 1 ? 1 : 0;
 
     const newFeature = {
       geometry,
@@ -181,7 +181,7 @@ export default function InteractiveReporterApp() {
         correct_type: likesProject ? 1 : 0,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
-        related_feature_id: relatedId // Link the new feature to the original feature
+        related_feature_id: relatedId
       },
     };
 
@@ -209,11 +209,11 @@ export default function InteractiveReporterApp() {
   const handleDeleteSketch = () => {
     if (
       selectedFeature &&
-      selectedFeature.attributes?.tempUserDrawn === true &&
+      selectedFeature.attributes?.feature_origin === 1 &&
       !selectedFeature.attributes?.OBJECTID &&
       sketchRef.current
     ) {
-      sketchRef.current.layer.remove(selectedFeature); // Remove the user-drawn feature
+      sketchRef.current.layer.remove(selectedFeature);
     }
     setOpen(false);
     setSelectedFeature(null);
@@ -223,7 +223,6 @@ export default function InteractiveReporterApp() {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={4} pb={2}>
       <Box width="100%" maxWidth="1250px" display="flex" flexDirection="row" justifyContent="space-between">
-        {/* Left Column: Map and Instructional Text */}
         <Box sx={{ width: "80%", height: "500px" }}>
           <Card>
             <CardContent sx={{ height: "100%", position: "relative" }}>
@@ -232,13 +231,11 @@ export default function InteractiveReporterApp() {
           </Card>
         </Box>
 
-        {/* Right Column: Sidebar Legend */}
         <Box sx={{ width: "20%", minWidth: "250px", overflowY: "auto" }}>
           <div ref={legendRef}></div>
         </Box>
       </Box>
 
-      {/* Title and Feedback Button */}
       <Typography variant="h4" sx={{ mt: 3 }}>MAG First Draft Significant Land Uses Map Feedback</Typography>
       <Box display="flex" gap={2} mt={2}>
         <Button variant="contained" color="primary" onClick={startDrawing}>
@@ -246,7 +243,6 @@ export default function InteractiveReporterApp() {
         </Button>
       </Box>
 
-      {/* Drawer for Feedback Form */}
       <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
         <Box sx={{ width: 360, pt: 2, px: 2, pb: 1 }} role="presentation">
           <DialogTitle>Comment Form</DialogTitle>
@@ -275,7 +271,18 @@ export default function InteractiveReporterApp() {
             <Button onClick={handleDeleteSketch} color="secondary">
               DELETE SKETCH
             </Button>
-            <Button onClick={() => { setOpen(false); }}>Cancel</Button>
+            <Button onClick={() => {
+              setOpen(false);
+              if (
+                sketchRef.current &&
+                selectedFeature?.attributes?.feature_origin === 1 &&
+                sketchRef.current.layer.graphics.includes(selectedFeature)
+              ) {
+                sketchRef.current.layer.remove(selectedFeature);
+              }
+              setSelectedFeature(null);
+              setDrawnGeometry(null);
+            }}>Cancel</Button>
             <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
           </DialogActions>
         </Box>

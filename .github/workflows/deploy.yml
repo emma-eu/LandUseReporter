@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Copy ArcGIS assets into public/esri
+        run: mkdir -p public/esri && cp -r node_modules/@arcgis/core/assets/* public/esri
+
       - name: Build the app
         run: npm run build
 
