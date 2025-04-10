@@ -104,6 +104,7 @@ export default function InteractiveReporterApp() {
           }
           if (event.state === "complete") {
             event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
+            sketch.update([event.graphic], { tool: "reshape" });
             setDrawnGeometry(event.graphic.geometry);
             setSelectedFeature(event.graphic);
             setOpenDrawn(true);
@@ -168,6 +169,7 @@ export default function InteractiveReporterApp() {
           selectedFeature.attributes.hasBeenCommented = true;
           selectedFeature.attributes.tempUserDrawn = false;
         }
+        sketchRef.current?.complete();
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
@@ -258,9 +260,6 @@ export default function InteractiveReporterApp() {
       <Box width="100%" maxWidth="1250px">
         <Typography variant="h4" gutterBottom>
           MAG First Draft Significant Land Uses Map Feedback
-        </Typography>
-        <Typography variant="h6" gutterBottom>
-          Click on an existing feature to activate the comment form and leave a comment on that feature. You can also click the "ADD A FEATURE" button to draw a new feature on the map. Double-click when you have finished digitizing the new feature and enter your information and comment into the popup that appears at right.
         </Typography>
         <Box display="flex" gap={2} mb={2}>
           <Button variant="contained" color="primary" onClick={startDrawing}>
