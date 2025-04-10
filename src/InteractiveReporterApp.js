@@ -158,7 +158,7 @@ export default function InteractiveReporterApp() {
         name,
         organization,
         submittedcomment: comment,
-        correct_type: 1,
+        correct_type: null,
         updated_type: priorityLevel,
         submitted_at: new Date().toISOString(),
         related_feature_id: selectedFeature?.attributes?.OBJECTID || null
