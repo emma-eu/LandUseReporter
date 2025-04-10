@@ -105,13 +105,7 @@ export default function InteractiveReporterApp() {
           }
           if (event.state === "complete") {
             const graphic = event.graphic;
-            graphic.attributes = {
-              feature_origin: 1,
-              name: name,
-              organization: organization,
-              submittedcomment: comment,
-              updated_type: priorityLevel
-            };
+            graphic.attributes = { feature_origin: 1 };
             sketch.update([graphic], { tool: "reshape" });
             setSelectedFeature(graphic);
             setDrawnGeometry(graphic.geometry);
@@ -138,6 +132,7 @@ export default function InteractiveReporterApp() {
     };
 
     loadMap();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startDrawing = () => {
