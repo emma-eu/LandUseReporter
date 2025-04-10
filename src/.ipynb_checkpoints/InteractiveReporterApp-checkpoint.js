@@ -24,15 +24,15 @@ export default function InteractiveReporterApp() {
   const legendRef = useRef(null);
   const sketchRef = useRef(null);
   const drawerRef = useRef(null);
-  
+
   const [open, setOpen] = useState(false);
-    const [selectedFeature, setSelectedFeature] = useState(null);
-    const [name, setName] = useState("");
+  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [name, setName] = useState("");
   const [organization, setOrganization] = useState("");
   const [comment, setComment] = useState("");
   const [likesProject, setLikesProject] = useState(false);
   const [priorityLevel, setPriorityLevel] = useState("");
-  
+
   useEffect(() => {
     const loadMap = async () => {
       const [MapView, WebMap, Sketch, GraphicsLayer] = await Promise.all([
@@ -54,7 +54,6 @@ export default function InteractiveReporterApp() {
         ui: { components: ["zoom", "attribution"] },
       });
 
-      
       view.when(() => {
         const infoDiv = document.createElement("div");
         infoDiv.innerHTML = "🛈 Use the +/- or two fingers on your trackpad to zoom. Click and drag to pan.";
@@ -98,26 +97,25 @@ export default function InteractiveReporterApp() {
         sketchRef.current = sketch;
 
         sketch.on("create", (event) => {
-  if (event.state === "start") {
-    alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
-  }
-  if (event.state === "complete") {
-    event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
-        setSelectedFeature(event.graphic);
-    setOpen(true);
-  }
-});
+          if (event.state === "start") {
+            alert("Sketch mode: Click to place vertices. Double-click to finish the shape.");
+          }
+          if (event.state === "complete") {
+            event.graphic.attributes = { tempUserDrawn: true, hasBeenCommented: false };
+            setSelectedFeature(event.graphic);
+            setOpen(true);
+          }
+        });
 
         view.on("click", async (event) => {
-  const response = await view.hitTest(event);
-  const result = response.results.find((r) => r.graphic?.attributes);
-  if (result) {
-    const graphic = result.graphic;
-    
-    setSelectedFeature(graphic);
-        setOpen(true);
-  }
-});
+          const response = await view.hitTest(event);
+          const result = response.results.find((r) => r.graphic?.attributes);
+          if (result) {
+            const graphic = result.graphic;
+            setSelectedFeature(graphic);
+            setOpen(true);
+          }
+        });
       });
     };
 
@@ -161,10 +159,13 @@ export default function InteractiveReporterApp() {
     try {
       const result = await responseLayer.applyEdits({ addFeatures: [newFeature] });
       if (result.addFeatureResults.length > 0 && !result.addFeatureResults[0].error) {
-      if (selectedFeature?.attributes) {
-        selectedFeature.attributes.hasBeenCommented = true;
-        selectedFeature.attributes.tempUserDrawn = false;
-      }
+        if (selectedFeature?.attributes) {
+          selectedFeature.attributes.hasBeenCommented = true;
+          selectedFeature.attributes.tempUserDrawn = false;
+        }
+        if (sketchRef.current) {
+          sketchRef.current.update([]);
+        }
         alert("Feature submitted successfully!");
       } else {
         alert("Submission failed.");
@@ -180,7 +181,17 @@ export default function InteractiveReporterApp() {
     setLikesProject(false);
     setPriorityLevel("");
     setSelectedFeature(null);
-      };
+  };
+
+  const handleDeleteSketch = () => {
+    const sketch = sketchRef.current;
+    const feature = selectedFeature;
+    if (sketch && feature) {
+      sketch.layer.remove(feature);
+      setSelectedFeature(null);
+      setOpen(false);
+    }
+  };
 
   function renderPopup() {
     const isDrawn = selectedFeature?.attributes?.feature_origin === 1 || selectedFeature?.attributes?.tempUserDrawn === true || selectedFeature?.attributes?.related_feature_id == null;
@@ -191,31 +202,27 @@ export default function InteractiveReporterApp() {
           <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
           <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
           {!isDrawn && (
-  <FormControlLabel
-    control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} 
-    label="This feature is correctly classified."
-    sx={{ mb: 1 }}
-  />
-)}
-                   {isDrawn ? (
+            <FormControlLabel
+              control={<Checkbox checked={likesProject} onChange={(e) => setLikesProject(e.target.checked)} />} 
+              label="This feature is correctly classified."
+              sx={{ mb: 1 }}
+            />
+          )}
+          {isDrawn ? (
             <Box sx={{ zIndex: 3001, position: "relative" }}>
-  <>
-    <>
-    <TextField
-      id="comment-field"
-      label="Comment Here (Optional)"
-      fullWidth
-      margin="dense"
-      multiline
-      rows={4}
-      value={comment}
-      onChange={(e) => setComment(e.target.value)}
-    />
-    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-  If you drew/created this feature, please assign it a classification from the options below:
-</Typography>
-  </>
-  </>
+              <TextField
+                id="comment-field"
+                label="Comment Here (Optional)"
+                fullWidth
+                margin="dense"
+                multiline
+                rows={4}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+                If you drew/created this feature, please assign it a classification from the options below:
+              </Typography>
               <FormControl fullWidth margin="dense">
                 <InputLabel>Classification</InputLabel>
                 <Select
@@ -226,7 +233,6 @@ export default function InteractiveReporterApp() {
                     container: drawerRef.current,
                     PaperProps: { style: { zIndex: 3002 } }
                   }}
-                  
                 >
                   <MenuItem value="Industrial District">Industrial District</MenuItem>
                   <MenuItem value="Employment District">Employment District</MenuItem>
@@ -253,8 +259,12 @@ export default function InteractiveReporterApp() {
             </>
           )}
         </DialogContent>
+        {selectedFeature?.attributes?.tempUserDrawn && (
+          <Button onClick={handleDeleteSketch} color="error" sx={{ mx: 2, mb: 1 }}>
+            Delete Sketch
+          </Button>
+        )}
         <DialogActions>
-          
           <Button onClick={() => { setOpen(false); }}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained" color="primary">Submit Feedback</Button>
         </DialogActions>
@@ -283,7 +293,7 @@ export default function InteractiveReporterApp() {
             </CardContent>
           </Card>
 
-                    <Drawer
+          <Drawer
             anchor="right"
             open={open}
             onClose={() => setOpen(false)}
