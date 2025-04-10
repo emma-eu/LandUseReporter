@@ -9,8 +9,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
@@ -248,7 +246,11 @@ export default function InteractiveReporterApp() {
           <DialogContent>
             <TextField label="Your Name" fullWidth margin="dense" value={name} onChange={(e) => setName(e.target.value)} />
             <TextField label="Your City/Organization" fullWidth margin="dense" value={organization} onChange={(e) => setOrganization(e.target.value)} />
-            <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
+
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
+              If you drew this feature, please provide its classification from the options below:
+            </Typography>
+
             <FormControl fullWidth margin="dense">
               <InputLabel>Classification</InputLabel>
               <Select value={priorityLevel} onChange={(e) => setPriorityLevel(e.target.value)} label="Classification">
@@ -259,6 +261,8 @@ export default function InteractiveReporterApp() {
                 <MenuItem value="Special District">Special District</MenuItem>
               </Select>
             </FormControl>
+
+            <TextField label="Comment Here (Optional)" fullWidth margin="dense" multiline rows={4} value={comment} onChange={(e) => setComment(e.target.value)} />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDeleteSketch} color="secondary">
