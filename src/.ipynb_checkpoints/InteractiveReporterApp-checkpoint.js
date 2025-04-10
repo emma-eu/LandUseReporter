@@ -240,7 +240,7 @@ export default function InteractiveReporterApp() {
                   onChange={(e) => setComment(e.target.value)}
                 />
                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1rem', mt: 2 }}>
-                  Select a classification for this new center:
+                  Select a classification for this new land use:
                 </Typography>
                 <FormControl fullWidth margin="dense">
                   <InputLabel>Classification</InputLabel>
