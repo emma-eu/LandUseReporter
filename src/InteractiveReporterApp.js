@@ -232,13 +232,18 @@ export default function InteractiveReporterApp() {
         </DialogContent>
         <DialogActions>
           {drawnGeometry && sketchRef.current && (
-            <Button color="error" onClick={() => {
-              const layer = sketchRef.current.layer;
-              layer.removeAll();
-              setDrawnGeometry(null);
-              setOpenDrawn(false);
-            }}>
-              Delete Feature
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ fontWeight: 600 }}
+              onClick={() => {
+                const layer = sketchRef.current.layer;
+                layer.removeAll();
+                setDrawnGeometry(null);
+                setOpenDrawn(false);
+              }}
+            >
+              DELETE SKETCH
             </Button>
           )}
           <Button onClick={() => { isDrawn ? setOpenDrawn(false) : setOpenExisting(false); }}>Cancel</Button>
